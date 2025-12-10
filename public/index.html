@@ -2889,12 +2889,47 @@ scene.add(particles);
 function animate() { requestAnimationFrame(animate); particles.rotation.y += 0.001; renderer.render(scene, camera); }
 animate();
 window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+
+    // ==========================================
+// 🛠️ إصلاح زر البحث عن دولة مخصصة
+// ==========================================
+
+const customCountryBtn = document.getElementById('customCountryBtn');
+const countryInput = document.getElementById('countryInput');
+
+// 1. تفعيل الزر عند الضغط عليه
+if (customCountryBtn) {
+    customCountryBtn.addEventListener('click', () => {
+        const countryName = countryInput.value.trim();
+        if (countryName) {
+            // نستخدم أيقونة كرة أرضية افتراضية لأننا لا نعرف علم الدولة التي كتبها المستخدم
+            selectCustomCountry(countryName, '🌍');
+            countryInput.value = ''; // تنظيف الحقل
+        } else {
+            alert("الرجاء كتابة اسم الدولة أولاً ⚠️");
+        }
+    });
+}
+
+// 2. تفعيل زر "Enter" أيضاً (لتحسين التجربة)
+if (countryInput) {
+    countryInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const countryName = countryInput.value.trim();
+            if (countryName) {
+                selectCustomCountry(countryName, '🌍');
+                countryInput.value = '';
+            }
+        }
+    });
+}
 </script>
 
 
 </body>
 
 </html>
+
 
 
 
