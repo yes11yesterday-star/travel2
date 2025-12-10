@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطة الهجرة - رحلتك نحو مستقبل أفضل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+        * {
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .card-3d:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-in {
+            animation: slideInRight 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.25;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #1E40AF 0%, #0891B2 50%, #0F172A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .locked-content {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #0F172A 0%, #1E40AF 100%);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .testimonial-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #0891B2;
+        }
+
+        /* Loading animation for chat */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #0891B2;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 85vw;
+                max-width: 320px;
+            }
+        }
+
+
+/* --- البطاقة العائمة 3D (تم توسيعها) --- */
+.card-3d-container {
+    width: 95%; /* عرض ممتاز للموبايل */
+    max-width: 650px; /* 🔥 تم التوسيع للكمبيوتر (كان 400px) */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 30px 20px;
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,255,255,0.05) inset;
+    transform-style: preserve-3d;
+    transform: rotateX(0deg);
+    animation: cardFloat 6s ease-in-out infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 90vh;
+}
+
+
+
+
+
+/* --- إصلاح العداد (منع القص) --- */
+.holo-progress {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 30px;
+    /* ❌ حذفنا الفلتر من هنا لأنه السبب في قص الحواف */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circular-chart-3d {
+    width: 100%; 
+    height: 100%;
+    transform: rotate(-90deg);
+    /* ✅ هذا السطر هو السر: يسمح للظل بالخروج خارج حدود المربع */
+    overflow: visible; 
+}
+
+/* خلفية الدائرة */
+.circle-bg-3d {
+    fill: none;
+    stroke: rgba(255,255,255,0.05);
+    stroke-width: 8;
+}
+
+/* الدائرة الملونة (التقدم) */
+.circle-fill-3d {
+    fill: none;
+    stroke: url(#gradient3d);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+    /* ✅ وضعنا التوهج هنا مباشرة على الخط */
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.6)); 
+}
+
+.percentage-text-3d {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(to bottom, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- توسيع المربع الأزرق (ليكون عريضاً وجميلاً) --- */
+.blue-cta-card {
+    /* الألوان المتدرجة المتناسقة مع الموقع */
+    background: linear-gradient(135deg, #1e3a8a 0%, #0891b2 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* ✅ جعلناه يأخذ العرض الكامل */
+    width: 100%;
+    min-height: 180px; /* ارتفاع مناسب */
+    margin-top: 40px;
+    border-radius: 24px;
+    padding: 30px 20px;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    
+    color: white;
+    box-shadow: 0 20px 50px -10px rgba(8, 145, 178, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.blue-cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* =========================================
+   تنسيقات الخطة المقفلة (Professional Slate Design)
+   ========================================= */
+
+/* 1. الحاوية الرئيسية: خلفية كحلية متدرجة (وليست سوداء) لتناسب الموقع */
+.locked-container {
+    /* تدرج من الكحلي الغامق إلى الأزرق الغامق */
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    font-family: 'Tajawal', sans-serif;
+    border-radius: 2rem; /* حواف ناعمة للحاوية */
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.2);
+}
+
+
+
+
+
+
+/* 1. تصميم البطاقات المنفصلة (3D Separated Cards) */
+.locked-card {
+    /* خلفية متدرجة لتعطي عمقاً للبطاقة */
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    
+    /* حدود واضحة جداً لفصل البطاقات */
+    border: 2px solid rgba(56, 189, 248, 0.3); 
+    border-top: 2px solid rgba(56, 189, 248, 0.6); /* إضاءة من الأعلى */
+    
+    border-radius: 24px;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 550px; /* طويلة جداً */
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    
+    /* ظل قوي جداً يفصل البطاقة عن الخلفية */
+    box-shadow: 
+        0 20px 50px -10px rgba(0, 0, 0, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.05); 
+        
+    transition: transform 0.3s ease;
+}
+
+.locked-card:hover {
+    transform: translateY(-10px); /* ترتفع عند التحويم */
+    border-color: #38bdf8;
+    box-shadow: 0 30px 60px -12px rgba(56, 189, 248, 0.3);
+}
+
+/* 2. خلفية القفل (تمويه) */
+.lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 17, 32, 0.5); /* طبقة داكنة شفافة */
+    backdrop-filter: blur(4px); /* تمويه خفيف للمحتوى */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* 3. أيقونة القفل الحية (Live 3D Icon) */
+.lock-icon-3d {
+    width: 80px;
+    height: 80px;
+    /* تدرج لوني يعطي شكل الكرة الذهبية 3D */
+    background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* ظلال داخلية وخارجية لتعزيز الـ 3D */
+    box-shadow: 
+        0 20px 40px rgba(217, 119, 6, 0.4),
+        inset -5px -5px 10px rgba(0,0,0,0.2),
+        inset 5px 5px 10px rgba(255,255,255,0.5);
+        
+    margin-bottom: 15px;
+    
+    /* الحركة الحية */
+    animation: floatLock 3s ease-in-out infinite;
+}
+
+/* حركة العوم والتنفس للقفل */
+@keyframes floatLock {
+    0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 20px 40px rgba(217, 119, 6, 0.4); }
+    50% { transform: translateY(-10px) scale(1.05); box-shadow: 0 30px 60px rgba(217, 119, 6, 0.6); }
+}
+
+/* أيقونة القفل البيضاء داخل الكرة */
+.lock-svg {
+    width: 35px; 
+    height: 35px; 
+    color: #fff;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+
+
+
+
+
+
+
+
+/* =========================================
+   تنسيقات شاشة التحميل "Ultra 3D Modern" (الجزء الناقص)
+   ========================================= */
+.analysis-overlay-3d-pro {
+    position: fixed;
+    inset: 0;
+    z-index: 99999; /* طبقة عليا جداً */
+    /* خلفية داكنة متدرجة تعطي عمقاً */
+    background: radial-gradient(circle at center bottom, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    font-family: 'Tajawal', sans-serif;
+    perspective: 1000px; /* سر الـ 3D */
+    overflow: hidden;
+}
+
+/* تأثير الإضاءة الخلفية */
+.analysis-overlay-3d-pro::before {
+    content: '';
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+    filter: blur(60px);
+    animation: floatLight 8s infinite alternate;
+}
+
+@keyframes floatLight { from { transform: translate(0,0); } to { transform: translate(50px, 50px); } }
+
+/* --- قائمة البلاطات (Tiles) --- */
+.tiles-stack {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    padding: 5px;
+    scrollbar-width: none;
+}
+.tiles-stack::-webkit-scrollbar { display: none; }
+
+/* تصميم البلاطة الواحدة */
+.tile-item {
+    background: linear-gradient(145deg, #1e293b, #0f172a); 
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tile-item.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tile-item.active {
+    background: linear-gradient(145deg, #1e3a8a, #172554); 
+    border: 1px solid #3b82f6;
+    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4); 
+    transform: scale(1.03) translateZ(10px); 
+}
+
+.tile-item.done {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+}
+
+.icon-bubble {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #334155, #0f172a); 
+    box-shadow: 
+        inset 1px 1px 2px rgba(255,255,255,0.2),
+        inset -2px -2px 4px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.tile-item.active .icon-bubble {
+    background: linear-gradient(135deg, #60a5fa, #2563eb); 
+    box-shadow: 0 0 15px #3b82f6;
+    color: white;
+    animation: pulseBubble 1s infinite;
+}
+
+.tile-item.done .icon-bubble {
+    background: #10b981;
+    box-shadow: none;
+    color: white;
+}
+
+.tile-text {
+    flex: 1;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: right;
+    line-height: 1.4;
+}
+.tile-item.active .tile-text { color: white; font-weight: 700; }
+
+@keyframes pulseBubble {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+
+
+
+
+
+
+
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 min-h-screen overflow-x-hidden">
+    <canvas id="three-canvas"></canvas>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="p-6">
+            <button onclick="closeSidebar()" class="text-white mb-8 hover:scale-110 transition-transform">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+
+            <nav class="space-y-4">
+                <a href="#" onclick="showPage('home')"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    🏠 الصفحة الرئيسية
+                </a>
+                <a href="#" onclick="showPage('chat')"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    💬 خطة الهجرة
+                </a>
+                <a href="#countries" onclick="closeSidebar()"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    🌍 الدول
+                </a>
+                <a href="#testimonials" onclick="closeSidebar()"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    ⭐ آراء الأشخاص
+                </a>
+                <a href="#" onclick="showPage('subscription')"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    👑 الاشتراكات
+                </a>
+                <!-- Auth Link in Sidebar -->
+                <a href="#" id="sidebarAuthLink" onclick="handleAuthNavigation()"
+                    class="block text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-all">
+                    🔐 تسجيل الدخول
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="app">
+
+        <!-- HOME PAGE -->
+        <div id="homePage">
+            <!-- Navbar -->
+            <nav class="glass-effect fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-2 md:p-3 rounded-xl shadow-lg">
+                            <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-black gradient-text">خطة الهجرة</h1>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <!-- Auth Button in Navbar -->
+                        <button id="navbarAuthBtn" onclick="handleAuthNavigation()"
+                            class="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-4 py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all text-sm">
+                            <span id="navbarAuthIcon">🔐</span>
+                            <span id="navbarAuthText">تسجيل الدخول</span>
+                        </button>
+
+                        <button onclick="openSidebar()" class="text-gray-700 hover:text-blue-800 transition-colors">
+                            <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Hero Section -->
+            <section class="min-h-screen flex items-center justify-center px-4 md:px-8 pt-24 md:pt-32 pb-16">
+                <div class="max-w-6xl mx-auto text-center fade-in">
+                    <div class="mb-6 inline-block">
+                        <div
+                            class="bg-gradient-to-r from-blue-100 to-cyan-100 px-6 py-3 rounded-full text-blue-900 font-semibold shadow-lg">
+                            ✨ رحلتك نحو مستقبل أفضل تبدأ من هنا
+                        </div>
+                    </div>
+
+                    <h1 class="text-4xl md:text-7xl font-black mb-6 leading-tight">
+                        <span class="gradient-text">حوّل حلم الهجرة</span>
+                        <br />
+                        <span class="text-gray-800">إلى واقع خلال 90 يوماً 🚀</span>
+                    </h1>
+
+                    <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+                        خطة شخصية ذكية للهجرة إلى كندا، أوروبا، أستراليا أو أمريكا - مصممة خصيصاً لك باستخدام تحليل ذكي
+                        متطور
+                    </p>
+
+                    <button onclick="showPage('chat')"
+                        class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-12 py-6 rounded-full font-black text-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all inline-flex items-center gap-3">
+                        <span>🎯</span>
+                        ابدأ الآن مجاناً
+                        <span>✨</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Trust Section -->
+            <section class="py-16 bg-white/50">
+                <div class="max-w-6xl mx-auto px-4 md:px-8 text-center">
+                    <p class="text-xl md:text-2xl text-gray-700 mb-8 font-semibold">
+                        موقعنا مرتبط مباشرة بمنظمات أوروبية وكندية رسمية لتسهيل إجراءات الهجرة بسرعة وشفافية
+                    </p>
+                </div>
+            </section>
+
+            <!-- How It Works -->
+            <section class="py-20 px-4 md:px-8">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-800 mb-4">كيف يعمل الموقع؟</h2>
+                        <p class="text-xl text-gray-600">4 خطوات بسيطة نحو حلمك</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center border-2 border-blue-200">
+                            <div
+                                class="bg-gradient-to-r from-blue-800 to-blue-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <span class="text-4xl">📝</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">1. أدخل معلوماتك</h3>
+                            <p class="text-gray-600">أجب على جميع الأسئلة بمعلومات صحيحة</p>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center border-2 border-cyan-200">
+                            <div
+                                class="bg-gradient-to-r from-cyan-600 to-cyan-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <span class="text-4xl">🧠</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">2. تحليل ذكي</h3>
+                            <p class="text-gray-600">الموقع سوف يحلل معلوماتك ويبحث عن أسرع طريق للسفر</p>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center border-2 border-slate-200">
+                            <div
+                                class="bg-gradient-to-r from-slate-700 to-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <span class="text-4xl">📋</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">3. خطة مخصصة</h3>
+                            <p class="text-gray-600">احصل على خطة تفصيلية للهجرة</p>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center border-2 border-blue-200">
+                            <div
+                                class="bg-gradient-to-r from-blue-800 to-blue-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <span class="text-4xl">🚀</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">4. ابدأ رحلتك</h3>
+                            <p class="text-gray-600">طبق الخطة وسافر إلى دولة أحلامك</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-12 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-3xl p-8">
+                        <p class="text-xl md:text-2xl font-bold text-gray-800">
+                            💡 خطتك فريدة لأنك منحتنا بياناتك — تحليل ذكي يضمن لك أسرع طريق للهجرة القانونية
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Countries Section -->
+            <section id="countries" class="py-20 bg-white/50 px-4 md:px-8">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-800 mb-4">أشهر وجهات الهجرة 🌍</h2>
+                        <p class="text-xl text-gray-600">اختر الدولة التي تحلم بالهجرة إليها</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇨🇦 كندا</h3>
+                            <p class="text-gray-600 mb-4">نظام هجرة متقدم وفرص عمل ممتازة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇩🇪 ألمانيا</h3>
+                            <p class="text-gray-600 mb-4">اقتصاد قوي وتعليم عالي الجودة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇫🇷 فرنسا</h3>
+                            <p class="text-gray-600 mb-4">ثقافة غنية ونوعية حياة رائعة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇸🇪 السويد</h3>
+                            <p class="text-gray-600 mb-4">رفاهية اجتماعية وبيئة نظيفة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇦🇺 أستراليا</h3>
+                            <p class="text-gray-600 mb-4">طبيعة خلابة ورواتب مرتفعة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl text-center hover:shadow-2xl border-2 border-transparent hover:border-blue-400 cursor-pointer"
+                            onclick="showPage('chat')">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">🇺🇸 أمريكا</h3>
+                            <p class="text-gray-600 mb-4">أرض الفرص والأحلام الكبيرة</p>
+                            <button
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                                اعرف المزيد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials -->
+            <section id="testimonials" class="py-20 px-4 md:px-8">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-800 mb-4"> آراء الأشخاص الذين استخدموا
+                            الموقع
+
+                            ⭐</h2>
+                        <p class="text-xl text-gray-600">مئات الأشخاص حققوا حلمهم
+
+
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Testimonial 1: مازن القحطاني -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=12" alt="مازن القحطاني"
+                                    class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">مازن القحطاني</h4>
+                                    <p class="text-gray-600">🇾🇪 اليمن → 🇺🇸 أمريكا</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"بصراحة، كنت فاقد الأمل. دفعت مبالغ كبيرة لمكاتب وهمية. لما
+                                دخلت هذا الموقع قلت أجرب، لكن النتيجة كانت خرافية! الخطة اللي طلعت لي كانت منظمة بشكل
+                                مذهل، كأنها مصممة خصيصاً لي. الآن أنا أعمل في كاليفورنيا كمبرمج، وكل شيء بدأ من هنا. هذا
+                                كنز حقيقي 💪"</p>
+                        </div>
+
+                        <!-- Testimonial 2: سامر العلي -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-cyan-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=33" alt="سامر العلي" class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">سامر العلي</h4>
+                                    <p class="text-gray-600">🇸🇾 سوريا → 🇸🇪 السويد</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"من وقت الحرب وأنا أحاول أسافر بطريقة قانونية وما كنت أعرف
+                                من وين أبدأ. الموقع هذا كان المنقذ. أعطاني خطة ذكية تناسب وضعي وعائلتي، وحتى توقعاتهم
+                                للمدة كانت دقيقة جداً. اليوم أولادي يدرسون في ستوكهولم، وبدأت حياة جديدة بكرامة. شكراً
+                                خبير الهجرة فعلاً أنقذتني 🙏"</p>
+                        </div>
+
+                        <!-- Testimonial 3: ندى عبد السلام -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-slate-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=45" alt="ندى عبد السلام"
+                                    class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">ندى عبد السلام</h4>
+                                    <p class="text-gray-600">🇪🇬 مصر → 🇩🇪 ألمانيا</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"كنت أظن الهجرة مستحيلة بدون 'واسطة' أو محامي، لكن الموقع
+                                هذا فاجأني. النظام سألني أسئلة دقيقة عن مؤهلاتي، وبعدها أعطاني خطة جاهزة لكل شيء — حتى
+                                الأوراق اللي ما كنت أعرف عنها! الآن أدرس الماجستير في برلين، وكل هذا بدأ من خطة الهجرة."
+                            </p>
+                        </div>
+
+                        <!-- Testimonial 4: أحمد الكاظمي -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=51" alt="أحمد الكاظمي"
+                                    class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">أحمد الكاظمي</h4>
+                                    <p class="text-gray-600">🇮🇶 العراق → 🇨🇦 كندا</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"والله العظيم ما كنت أتوقع أهاجر يوم من الأيام. تعبت سنتين
+                                وأنا أقدّم أوراقي عن طريق مكاتب وما حد ساعدني. صدمة لما لقيت هذا الموقع، جاوبت على
+                                الأسئلة، وبعد خمس دقايق وصلتني خطة تفصيلية للهجرة إلى كندا! طبقت الخطوات وحدة وحدة، وبعد
+                                6 شهور وصلت كندا رسمياً. هذا الموقع غير حياتي فعلاً، شكراً من القلب 💗"</p>
+                        </div>
+
+                        <!-- Testimonial 5: ليلى الحسن -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-cyan-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=47" alt="ليلى الحسن" class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">ليلى الحسن</h4>
+                                    <p class="text-gray-600">🇩🇿 الجزائر → 🇫🇷 فرنسا</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"كنت نحاول من 2019 نحصل على فيزا فرنسا وكل مرة الرفض! لما
+                                جربت الموقع ومليت المعلومات، صراحة انبهرت. الخطوات واضحة، والشرح مفصل كأنك تتكلم مع خبير
+                                حقيقي. تابعت الخطة حرفياً، وفعلاً تم قبولي بعد 4 أشهر. اليوم نعيش في باريس والحلم تحقق
+                                الحمد لله ❤️"</p>
+                        </div>
+
+                        <!-- Testimonial 6: يوسف بن سعيد -->
+                        <div class="card-3d bg-white rounded-3xl p-8 shadow-xl border-2 border-slate-200">
+                            <div class="flex items-center gap-4 mb-6">
+                                <img src="https://i.pravatar.cc/150?img=68" alt="يوسف بن سعيد"
+                                    class="testimonial-avatar">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-800">يوسف بن سعيد</h4>
+                                    <p class="text-gray-600">🇲🇦 المغرب → 🇦🇺 أستراليا</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span>⭐⭐⭐⭐⭐</span>
+                            </div>
+                            <p class="text-gray-700 italic">"كنت نحلم نهاجر لأستراليا من وأنا صغير، ولكن الطرق كانت
+                                معقدة بزا. هاد الموقع دار ليي تحليل شامل، وعرف شنو الأنسب ليا. وخلال شهور كنت كنحضر
+                                المقابلة القنصلية! اليوم أنا نشتغل في سيدني فمجالي. الله يبارك في أصحاب هاد الموقع، راه
+                                فعلاً خدموني بذكاء ماشي صدفة."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section id="cta" class="py-20 bg-gradient-to-r from-blue-800 via-cyan-600 to-slate-900 px-4 md:px-8">
+                <div class="max-w-4xl mx-auto text-center text-white">
+                    <h2 class="text-4xl md:text-6xl font-black mb-6">ابدأ الآن وحقّق حلمك 🌟</h2>
+                    <p class="text-xl md:text-2xl mb-8 leading-relaxed">
+                        حقّق حلمك بالهجرة الشرعية إلى أوروبا، كندا، أستراليا أو أمريكا
+                    </p>
+
+                    <div class="flex flex-col md:flex-row gap-4 justify-center mb-8 flex-wrap text-sm md:text-base">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            <span>خطة مجانية للبدء</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            <span>تحليل ذكي فوري</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            <span>دعم 24/7</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showPage('chat')"
+                        class="bg-white text-blue-800 px-12 py-6 rounded-full font-black text-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all inline-flex items-center gap-3">
+                        <span>🚀</span>
+                        ابدأ الآن مجاناً
+                        <span>✨</span>
+                    </button>
+
+                    <p class="mt-6 text-lg">💳 أو <a href="#" onclick="showPage('subscription')"
+                            class="underline hover:text-white font-bold">احصل على الخطة الكاملة</a> مقابل $29 شهرياً فقط
+                    </p>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="bg-slate-900 text-white py-12 px-4 md:px-8">
+                <div class="max-w-7xl mx-auto text-center">
+                    <div class="mb-8">
+                        <h3 class="text-2xl md:text-3xl font-black mb-4 gradient-text">خطة الهجرة</h3>
+                        <p class="text-gray-300 text-lg mb-6">منصة ذكية لتسهيل إجراءات الهجرة إلى أوروبا، كندا، أستراليا
+                            وأمريكا</p>
+                    </div>
+
+                    <div class="border-t border-gray-700 pt-8">
+                        <p class="text-xl md:text-2xl font-bold text-cyan-400 mb-3">📩 للمساعدة أو في حال واجهتك مشكلة
+                            تواصل معنا عبر البريد:</p>
+                        <a href="mailto:zetz95300@gmail.com"
+                            class="text-2xl md:text-3xl font-black text-white hover:text-cyan-400 transition-colors">zetz95300@gmail.com</a>
+                        <p class="text-gray-400 text-sm mt-6">© 2025 خطة الهجرة. جميع الحقوق محفوظة.</p>
+                        <p class="text-gray-500 text-sm mt-2">تم التطوير بـ ❤️ لمساعدة الناس في تحقيق أحلامهم</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- CHAT PAGE -->
+        <div id="chatPage" class="hidden">
+            <div class="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-6xl relative z-10">
+
+                <!-- Header -->
+                <header class="glass-effect rounded-3xl p-4 md:p-6 mb-6 md:mb-8 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 md:gap-4">
+                            <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-3 md:p-4 rounded-2xl shadow-lg">
+                                <svg class="w-6 h-6 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl md:text-4xl font-black gradient-text">خطة الهجرة</h1>
+                                <p class="text-gray-600 text-sm md:text-lg">رحلتك نحو مستقبل أفضل تبدأ هنا</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Main Content Area -->
+                <div id="mainContent" class="glass-effect rounded-3xl shadow-2xl overflow-hidden">
+
+                    <!-- Country Selection -->
+                    <div id="countrySelection" class="p-4 md:p-8">
+                        <div class="mb-4">
+                            <button onclick="showPage('home')"
+                                class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                <span class="font-semibold">العودة للرئيسية</span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mb-6 md:mb-8">
+                            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-3">اختر وجهتك للهجرة 🌍
+                            </h2>
+                            <p class="text-gray-600 text-base md:text-xl mb-2">اكتب اسم أي دولة في العالم أو اختر من
+                                الاقتراحات</p>
+                        </div>
+
+                        <!-- Country Input Field -->
+                        <div class="max-w-2xl mx-auto mb-6 md:mb-8">
+                            <div class="relative">
+                                <input type="text" id="countryInput" placeholder="اكتب اسم الدولة..."
+                                    class="w-full px-6 md:px-8 py-4 md:py-6 text-lg md:text-xl rounded-2xl border-4 border-blue-200 focus:border-cyan-400 focus:outline-none shadow-xl transition-all text-center font-bold text-gray-800">
+                                <div
+                                    class="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-2xl md:text-3xl">
+                                    🔍</div>
+                            </div>
+                            <button id="customCountryBtn"
+                                class="w-full mt-3 md:mt-4 bg-gradient-to-r from-blue-800 to-cyan-600 text-white py-4 md:py-5 rounded-2xl font-bold text-lg md:text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all">
+                                متابعة مع هذه الدولة ➤
+                            </button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="flex items-center gap-2 md:gap-4 max-w-2xl mx-auto mb-6 md:mb-8">
+                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent">
+                            </div>
+                            <span class="text-gray-500 font-semibold text-sm md:text-lg text-center">أو اختر من الوجهات
+                                الشائعة</span>
+                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Popular Countries -->
+                        <div class="mb-4 md:mb-6 text-center">
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-700 mb-4">🔥 الوجهات الأكثر طلباً</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6" id="countryButtons">
+                        </div>
+
+
+
+
+
+
+                        <!-- More Countries -->
+                        <div class="mt-6 md:mt-8">
+                            <h3 class="text-lg md:text-xl font-bold text-gray-700 mb-3 md:mb-4 text-center">🌎 وجهات
+                                أخرى شائعة</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                                <button onclick="selectCustomCountry('السويد', '🇸🇪')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇸🇪</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>السويد</span>
+                                    </div>
+                                </button>
+                                <button onclick="selectCustomCountry('النرويج', '🇳🇴')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇳🇴</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>النرويج</span>
+                                    </div>
+
+
+                                </button>
+                                <button onclick="selectCustomCountry('هولندا', '🇳🇱')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇳🇱</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>هولندا</span>
+                                    </div>
+
+
+                                </button>
+                                <button onclick="selectCustomCountry('سويسرا', '🇨🇭')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇨🇭</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>سويسرا</span>
+                                    </div>
+
+
+                                </button>
+                                <button onclick="selectCustomCountry('نيوزيلندا', '🇳🇿')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇳🇿</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>نيوزيلندا</span>
+                                    </div>
+
+
+                                </button>
+                                <button onclick="selectCustomCountry('اليابان', '🇯🇵')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇯🇵</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>اليابان</span>
+                                    </div>
+
+                                </button>
+                                <button onclick="selectCustomCountry('الإمارات', '🇦🇪')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇦🇪</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>الإمارات</span>
+                                    </div>
+
+
+                                </button>
+                                <button onclick="selectCustomCountry('سنغافورة', '🇸🇬')"
+                                    class="suggestion-btn bg-white rounded-xl p-3 md:p-4 shadow-md hover:shadow-xl text-center border-2 border-transparent hover:border-cyan-400">
+                                    <div class="text-3xl md:text-5xl mb-2 md:mb-3">🇸🇬</div>
+                                    <div
+                                        class="font-bold text-gray-800 text-sm md:text-lg flex items-center justify-center gap-1 md:gap-2">
+                                        <span>سنغافورة</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <!-- Chat Section -->
+                    <div id="chatSection" class="hidden p-4 md:p-8">
+                        <div class="mb-4">
+                            <button onclick="goHome()"
+                                class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                <span class="font-semibold">العودة للرئيسية</span>
+                            </button>
+                        </div>
+
+
+
+
+
+
+
+
+                        <div
+                            class="mb-4 md:mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
+                            <div>
+                                <h2 class="text-xl md:text-2xl font-bold text-gray-800">مستشار الهجرة الذكي</h2>
+                                <p class="text-gray-600 text-sm md:text-base">اسأل أي سؤال عن خطة هجرتك</p>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 md:gap-3 bg-gradient-to-r from-blue-100 to-cyan-100 px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg">
+                                <span id="selectedCountryFlag" class="text-3xl md:text-5xl"></span>
+                                <span id="selectedCountryName"
+                                    class="text-lg md:text-2xl font-bold text-gray-800"></span>
+                            </div>
+                        </div>
+
+                        <div id="chatMessages"
+                            class="space-y-3 md:space-y-4 mb-4 md:mb-6 max-h-[400px] md:max-h-[500px] overflow-y-auto p-3 md:p-4 bg-white/50 rounded-2xl">
+                        </div>
+
+                        <div id="inputArea" class="flex gap-2 md:gap-3">
+                            <input type="text" id="userInput" placeholder="اكتب رسالتك هنا..."
+                                class="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-full border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-base md:text-lg transition-all">
+                            <button id="sendBtn"
+                                class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold hover:shadow-xl transition-all transform hover:scale-105 text-sm md:text-base">
+                                إرسال ➤
+                            </button>
+                        </div>
+
+                        <div class="mt-3 md:mt-4 text-center">
+                            <div
+                                class="inline-flex items-center gap-2 bg-cyan-100 px-4 md:px-6 py-2 rounded-full text-sm md:text-base">
+                                <span class="font-semibold text-gray-700">مدعوم بـ</span>
+                                <span class="text-cyan-600 font-bold">Gemini AI + Backend Server</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- SUBSCRIPTION PAGE -->
+        <div id="subscriptionPage" class="hidden min-h-screen">
+            <!-- Navbar -->
+            <nav class="glass-effect fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-2 md:p-3 rounded-xl shadow-lg">
+                            <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-black gradient-text">خطة الهجرة</h1>
+                        </div>
+                    </div>
+
+                    <button onclick="openSidebar()" class="text-gray-700 hover:text-blue-800 transition-colors">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="container mx-auto px-4 md:px-8 pt-28 md:pt-32 pb-16 max-w-6xl">
+                <!-- Back Button -->
+                <div class="mb-6">
+                    <button onclick="showPage('home')"
+                        class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="font-semibold">العودة للرئيسية</span>
+                    </button>
+                </div>
+
+                <!-- Header -->
+                <div class="text-center mb-12 fade-in">
+                    <div class="inline-block mb-6">
+                        <div
+                            class="bg-gradient-to-r from-slate-100 to-blue-100 px-6 py-3 rounded-full text-slate-800 font-semibold shadow-lg">
+                            👑 اختر خطة اشتراكك الآن
+                        </div>
+                    </div>
+
+                    <h1 class="text-4xl md:text-6xl font-black mb-4">
+                        <span class="gradient-text">احصل على خطتك الكاملة</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+                        اشترك الآن واحصل على خطة الهجرة التفصيلية المخصصة لك
+                    </p>
+                </div>
+
+                <!-- Subscription Card -->
+                <div class="max-w-2xl mx-auto">
+                    <div
+                        class="glass-effect rounded-3xl shadow-2xl overflow-hidden border-4 border-gradient-to-r from-blue-800 to-cyan-600">
+                        <!-- Ribbon -->
+                        <div
+                            class="bg-gradient-to-r from-slate-900 to-blue-800 text-white text-center py-3 font-bold text-lg">
+                            ⭐ العرض الأفضل - وفّر وقتك ومالك ⭐
+                        </div>
+
+                        <div class="p-8 md:p-12 bg-white">
+                            <!-- Price Section -->
+                            <div class="text-center mb-8">
+                                <h2 class="text-3xl md:text-4xl font-black text-gray-800 mb-4">الاشتراك الشهري</h2>
+                                <div class="flex items-baseline justify-center gap-3 mb-2">
+
+
+
+
+
+
+
+
+
+                                    <div class="flex items-center justify-center gap-6">
+                                        <!-- السعر القديم الكبير -->
+                                        <span
+                                            class="text-6xl md:text-7xl font-extrabold text-red-500 line-through decoration-4 opacity-95">
+                                            $100
+                                        </span>
+
+                                        <!-- السعر الجديد الضخم -->
+                                        <span
+                                            class="text-8xl md:text-9xl font-black gradient-text leading-tight drop-shadow-xl">
+                                            $29
+                                        </span>
+                                    </div>
+
+
+
+
+                                </div>
+
+                                <p class="text-gray-500 text-lg">خطة شاملة لتحقيق حلمك بالهجرة</p>
+                            </div>
+
+                            <!-- Features -->
+                            <div class="space-y-4 mb-8">
+                                <div class="flex items-start gap-3 p-4 bg-cyan-50 rounded-xl">
+                                    <div class="bg-cyan-600 p-1 rounded-full flex-shrink-0 mt-1">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-lg">خطة هجرة مخصصة ومفصلة</h4>
+                                        <p class="text-gray-600">خطة كاملة مصممة خصيصاً لوضعك الشخصي</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-xl">
+                                    <div class="bg-slate-700 p-1 rounded-full flex-shrink-0 mt-1">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-lg">تحديثات مستمرة لخطتك</h4>
+                                        <p class="text-gray-600">نتابع تطورات ملفك ونحدث خطتك</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-xl">
+                                    <div class="bg-blue-800 p-1 rounded-full flex-shrink-0 mt-1">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-lg">تقارير تفصيلية شاملة</h4>
+                                        <p class="text-gray-600">جميع التفاصيل والتكاليف والمواعيد</p>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                            <!-- Payment Methods -->
+                            <div class="mb-8">
+                                <h3 class="text-2xl font-bold text-gray-800 text-center mb-6">اختر طريقة الدفع</h3>
+
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <!-- ZainCash -->
+                                    <button onclick="showPage('zaincashPage')"
+                                        class="card-3d group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-2xl p-6 border-3 border-purple-300 hover:border-purple-500 transition-all shadow-lg hover:shadow-2xl">
+
+
+
+                                        <div class="flex items-center justify-center gap-3 mb-3">
+                                            <div
+                                                class="bg-purple-600 p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-right">
+                                                <h4 class="text-xl font-black text-purple-800">ZainCash</h4>
+                                                <p class="text-sm text-purple-600">الدفع عبر زين كاش</p>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white rounded-lg p-3 text-center">
+                                            <p class="text-purple-700 font-semibold">🇮🇶 مخصص للعراق</p>
+                                            <p class="text-sm text-gray-600 mt-1">دفع سريع وآمن</p>
+                                        </div>
+                                    </button>
+
+                                    <!-- Binance Pay -->
+                                    <button onclick="showPage('binanceInfoPage')"
+                                        class="card-3d group bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-2xl p-6 border-3 border-yellow-300 hover:border-yellow-500 transition-all shadow-lg hover:shadow-2xl">
+
+                                        <div class="flex items-center justify-center gap-3 mb-3">
+                                            <div
+                                                class="bg-gradient-to-r from-yellow-400 to-yellow-600 p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                                                <svg class="w-8 h-8 text-gray-900" fill="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-right">
+                                                <h4 class="text-xl font-black text-yellow-900">Binance Pay</h4>
+                                                <p class="text-sm text-yellow-700">الدفع بالعملات الرقمية</p>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white rounded-lg p-3 text-center">
+                                            <p class="text-yellow-800 font-semibold">🌍 عالمي</p>
+                                            <p class="text-sm text-gray-600 mt-1">مخصص للدول العربية</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Trust Badges -->
+                            <div class="bg-gradient-to-r from-green-50 to-cyan-50 rounded-2xl p-6 text-center">
+                                <div class="flex items-center justify-center gap-2 mb-3">
+                                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <h4 class="text-green-800 font-bold text-lg">دفع آمن ومحمي 🔒</h4>
+                                </div>
+                                <p class="text-gray-700">جميع المعاملات محمية بأعلى معايير الأمان العالمية</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- ======================= صفحة الدفع عبر زينكاش ======================= -->
+        <div id="zaincashPage" class="hidden min-h-screen bg-[#0b1320] text-white px-4 py-10">
+            <div class="max-w-xl mx-auto bg-[#111a2d] rounded-3xl shadow-2xl p-8 border border-[#1c2b40]">
+
+                <h2 class="text-center text-3xl font-bold text-cyan-300 mb-2">
+                    الدفع عبر ZainCash 💳
+                </h2>
+
+                <p class="text-center text-gray-300 mb-6">
+                    سعر الاشتراك هو <span class="text-cyan-400 font-bold">29$</span>
+                    أي ما يعادل <span class="font-bold">42 ألف دينار عراقي</span>
+                </p>
+
+                <!-- خطوات الدفع -->
+                <div class="bg-[#0f1a30] rounded-2xl p-6 mb-6 border border-[#22344d]">
+
+                    <h3 class="text-xl font-bold text-green-300 mb-3 flex items-center gap-2">
+                        ✔ خطوات الدفع السريعة
+                    </h3>
+
+                    <p class="mb-4 text-gray-300">
+                        1. قم بتحويل المبلغ إلى رقم المحفظة التالي:
+                    </p>
+
+                    <div
+                        class="text-center bg-[#1a2740] py-4 rounded-xl mb-4 text-3xl font-bold tracking-wide text-cyan-300">
+                        07815131695
+                    </div>
+
+                    <button onclick="copyZainWallet()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-3 rounded-xl mb-4">
+                        نسخ الرقم 📋
+                    </button>
+
+                    <p class="mb-4 text-gray-300">
+                        2. بعد إتمام عملية التحويل، أرسل <span class="font-bold text-white">لقطة شاشة</span> لعملية
+                        الدفع إلى واتساب.
+                    </p>
+
+                    <p class="mb-4 text-gray-300">
+                        3. سيتم تفعيل الاشتراك خلال دقائق بعد إرسال لقطة الشاشة.
+                    </p>
+
+                    <button onclick="sendToWhatsapp()"
+                        class="w-full bg-green-600 hover:bg-green-700 transition text-white py-3 rounded-xl">
+                        إرسال لقطة الدفع إلى واتساب 💬
+                    </button>
+
+
+                    <p class="text-center text-green-400 text-xl font-bold mt-4">
+                        رقم الواتساب:
+                        <span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">
+                            +1 (647) 367-6233
+                        </span>
+                    </p>
+
+
+                </div>
+
+
+
+                <!-- ملاحظات مهمة -->
+                <div class="bg-[#162238] rounded-2xl p-4 border border-[#2b3d55] mb-6">
+                    <h3 class="text-lg font-bold text-yellow-400 mb-2">⚠ ملاحظات مهمة</h3>
+                    <p class="text-gray-300">
+                        - تأكد من إرسال لقطة الشاشة إلى واتساب مباشرة بعد الدفع.
+                    </p>
+                    <p class="text-gray-300">
+                        - أي تفاصيل ناقصة قد تؤخر تفعيل اشتراكك.
+                    </p>
+                </div>
+
+
+                <button onclick="showPage('subscription')"
+                    class="w-full bg-gray-500 hover:bg-gray-600 transition text-white py-3 rounded-xl">
+                    ← العودة إلى صفحة الاشتراكات
+                </button>
+
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- ======================= صفحة الدفع عبر Binance ======================= -->
+        <div id="binanceInfoPage" class="hidden min-h-screen bg-[#0b1320] text-white px-4 py-10">
+
+            <div class="max-w-xl mx-auto bg-[#111a2d] rounded-3xl shadow-2xl p-8 border border-[#1c2b40]">
+
+                <h2 class="text-center text-3xl font-bold text-yellow-400 mb-4">
+                    الدفع عبر Binance 💰
+                </h2>
+
+                <p class="text-center text-gray-300 mb-6">
+                    يمكنك إرسال دفعتك باستخدام محفظتك في Binance عبر الطرق التالية:
+                </p>
+
+                <!-- 🔹 الطريقة الأولى — الدفع باستخدام Binance UID -->
+                <div class="bg-[#0f1a30] rounded-2xl p-6 mb-6 border border-[#22344d]">
+                    <h3 class="text-xl font-bold text-purple-300 mb-3 flex items-center gap-2">
+                        🪪 الطريقة الأولى: الدفع عن طريق الـ ID
+                    </h3>
+
+                    <div
+                        class="text-center bg-yellow-500 text-black py-4 rounded-xl text-2xl font-bold tracking-wide mb-3">
+                        1135279715
+                    </div>
+
+                    <button onclick="copyUID()"
+                        class="w-full bg-yellow-600 hover:bg-yellow-700 transition text-white py-3 rounded-xl font-bold">
+                        نسخ رقم الـ ID 📋
+                    </button>
+                </div>
+
+                <!-- 🔹 الطريقة الثانية — الدفع باستخدام عنوان المحفظة -->
+                <div class="bg-[#0f1a30] rounded-2xl p-6 mb-6 border border-[#22344d]">
+                    <h3 class="text-xl font-bold text-green-300 mb-3 flex items-center gap-2">
+                        🏦 الطريقة الثانية: الدفع عن طريق المحفظة (TRC20)
+                    </h3>
+
+                    <div
+                        class="text-center bg-yellow-500 text-black py-4 rounded-xl text-xl font-bold tracking-wide mb-3 break-words">
+                        TMnyb7tDL9oKpy4RpB2BjaXWpGUPLNM78y
+                    </div>
+
+                    <button onclick="copyBinanceWallet()"
+                        class="w-full bg-yellow-600 hover:bg-yellow-700 transition text-white py-3 rounded-xl font-bold">
+                        نسخ عنوان المحفظة 📋
+                    </button>
+
+                    <p class="text-gray-400 mt-3 text-sm">
+                        ⚠ ملاحظة: تأكد من استخدام شبكة Tron (TRC20) فقط.
+                    </p>
+                </div>
+
+
+
+
+
+
+
+                <button onclick="window.open('https://wa.me/16473676233', '_blank')"
+                    class="w-full bg-green-600 hover:bg-green-700 transition text-white py-3 rounded-xl mb-4 font-bold">
+                    💬 إرسال لقطة الدفع إلى واتساب
+                </button>
+
+
+
+
+
+                <p class="text-center text-green-400 text-xl font-bold mt-4 mb-6">
+                    رقم الواتساب:
+                    <span
+                        style="direction: ltr; unicode-bidi: isolate; display: inline-block; font-family: 'Inter', 'Arial', sans-serif;">
+                        +1 (647) 367-6233
+                    </span>
+                </p>
+
+
+
+
+
+                <!-- زر العودة -->
+                <button onclick="showPage('subscription')"
+                    class="w-full bg-gray-500 hover:bg-gray-600 transition text-white py-3 rounded-xl font-bold">
+                    ← العودة إلى صفحة الاشتراكات
+                </button>
+
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- LOGIN PAGE -->
+        <div id="loginPage" class="hidden min-h-screen">
+            <!-- Navbar -->
+            <nav class="glass-effect fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-2 md:p-3 rounded-xl shadow-lg">
+                            <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-black gradient-text">خطة الهجرة</h1>
+                        </div>
+                    </div>
+
+                    <button onclick="openSidebar()" class="text-gray-700 hover:text-blue-800 transition-colors">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="container mx-auto px-4 md:px-8 pt-28 md:pt-32 pb-16 max-w-2xl">
+                <!-- Back Button -->
+                <div class="mb-6">
+                    <button onclick="showPage('home')"
+                        class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="font-semibold">العودة للرئيسية</span>
+                    </button>
+                </div>
+
+                <!-- Login Card -->
+                <div class="glass-effect rounded-3xl shadow-2xl overflow-hidden fade-in">
+                    <div class="bg-gradient-to-r from-blue-800 via-cyan-600 to-slate-900 text-white text-center py-6">
+                        <h2 class="text-3xl md:text-4xl font-black mb-2">🔐 تسجيل الدخول</h2>
+                        <p class="text-lg">مرحباً بعودتك! سجل دخولك للمتابعة</p>
+                    </div>
+
+                    <div class="p-8 md:p-12 bg-white">
+                        <form id="loginForm" class="space-y-6">
+                            <!-- Email Field -->
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2 text-lg">البريد الإلكتروني</label>
+                                <input type="email" id="loginEmail" required placeholder="example@email.com"
+                                    class="w-full px-6 py-4 rounded-xl border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-lg transition-all">
+                            </div>
+
+                            <!-- Password Field -->
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2 text-lg">كلمة المرور</label>
+                                <input type="password" id="loginPassword" required placeholder="••••••••"
+                                    class="w-full px-6 py-4 rounded-xl border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-lg transition-all">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-blue-800 to-cyan-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all">
+                                تسجيل الدخول ➤
+                            </button>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-300"></div>
+                            <span class="text-gray-500 font-semibold">أو</span>
+                            <div class="flex-1 h-px bg-gray-300"></div>
+                        </div>
+
+                        <!-- Signup Link -->
+                        <div class="text-center">
+                            <p class="text-gray-600 text-lg mb-4">ليس لديك حساب؟</p>
+                            <button onclick="showPage('signup')"
+                                class="w-full bg-gradient-to-r from-slate-700 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all">
+                                إنشاء حساب جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIGNUP PAGE -->
+        <div id="signupPage" class="hidden min-h-screen">
+            <!-- Navbar -->
+            <nav class="glass-effect fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-2 md:p-3 rounded-xl shadow-lg">
+                            <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-black gradient-text">خطة الهجرة</h1>
+                        </div>
+                    </div>
+
+                    <button onclick="openSidebar()" class="text-gray-700 hover:text-blue-800 transition-colors">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="container mx-auto px-4 md:px-8 pt-28 md:pt-32 pb-16 max-w-2xl">
+                <!-- Back Button -->
+                <div class="mb-6">
+                    <button onclick="showPage('home')"
+                        class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="font-semibold">العودة للرئيسية</span>
+                    </button>
+                </div>
+
+                <!-- Signup Card -->
+                <div class="glass-effect rounded-3xl shadow-2xl overflow-hidden fade-in">
+                    <div class="bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-600 text-white text-center py-6">
+                        <h2 class="text-3xl md:text-4xl font-black mb-2">✨ إنشاء حساب جديد</h2>
+                        <p class="text-lg">انضم إلينا وابدأ رحلتك نحو مستقبل أفضل</p>
+                    </div>
+
+                    <div class="p-8 md:p-12 bg-white">
+                        <form id="signupForm" class="space-y-6">
+                            <!-- Email Field -->
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2 text-lg">البريد الإلكتروني</label>
+                                <input type="email" id="signupEmail" required placeholder="example@email.com"
+                                    class="w-full px-6 py-4 rounded-xl border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-lg transition-all">
+                            </div>
+
+                            <!-- Password Field -->
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2 text-lg">كلمة المرور</label>
+                                <input type="password" id="signupPassword" required minlength="6" placeholder="••••••••"
+                                    class="w-full px-6 py-4 rounded-xl border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-lg transition-all">
+                                <p class="text-sm text-gray-500 mt-2">كلمة المرور يجب أن تكون 6 أحرف على الأقل</p>
+                            </div>
+
+                            <!-- Confirm Password Field -->
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2 text-lg">تأكيد كلمة المرور</label>
+                                <input type="password" id="signupPasswordConfirm" required minlength="6"
+                                    placeholder="••••••••"
+                                    class="w-full px-6 py-4 rounded-xl border-2 border-cyan-300 focus:border-cyan-500 focus:outline-none text-lg transition-all">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-blue-800 to-cyan-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all">
+                                إنشاء الحساب ✨
+                            </button>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-300"></div>
+                            <span class="text-gray-500 font-semibold">أو</span>
+                            <div class="flex-1 h-px bg-gray-300"></div>
+                        </div>
+
+                        <!-- Login Link -->
+                        <div class="text-center">
+                            <p class="text-gray-600 text-lg mb-4">لديك حساب بالفعل؟</p>
+                            <button onclick="showPage('login')"
+                                class="w-full bg-gradient-to-r from-slate-700 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all">
+                                تسجيل الدخول
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCOUNT PAGE -->
+        <div id="accountPage" class="hidden min-h-screen">
+            <!-- Navbar -->
+            <nav class="glass-effect fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-blue-800 to-cyan-600 p-2 md:p-3 rounded-xl shadow-lg">
+                            <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-black gradient-text">خطة الهجرة</h1>
+                        </div>
+                    </div>
+
+                    <button onclick="openSidebar()" class="text-gray-700 hover:text-blue-800 transition-colors">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="container mx-auto px-4 md:px-8 pt-28 md:pt-32 pb-16 max-w-4xl">
+                <!-- Back Button -->
+                <div class="mb-6">
+                    <button onclick="showPage('home')"
+                        class="flex items-center gap-2 text-gray-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="font-semibold">العودة للرئيسية</span>
+                    </button>
+                </div>
+
+                <!-- Account Header -->
+                <div class="text-center mb-12 fade-in">
+                    <div class="inline-block mb-6">
+                        <div
+                            class="bg-gradient-to-r from-blue-100 to-cyan-100 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl">
+                            <span class="text-5xl">👤</span>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black mb-4">
+                        <span class="gradient-text">حسابي</span>
+                    </h1>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- User Info Card -->
+                    <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+                        <h3 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📧</span>
+                            معلومات الحساب
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-cyan-50 p-4 rounded-xl">
+                                <p class="text-gray-600 text-sm mb-1">البريد الإلكتروني</p>
+                                <p id="accountEmail" class="text-gray-800 font-bold text-lg">Loading...</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-xl">
+                                <p class="text-gray-600 text-sm mb-1">تاريخ التسجيل</p>
+                                <p id="accountCreatedAt" class="text-gray-800 font-bold text-lg">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription Status Card -->
+                    <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+                        <h3 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-3">
+                            <span class="text-3xl">👑</span>
+                            حالة الاشتراك
+                        </h3>
+                        <div id="subscriptionStatus" class="space-y-4">
+                            <!-- Will be populated dynamically -->
+                            <div class="text-center py-8">
+                                <div class="animate-pulse">
+                                    <div class="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-3"></div>
+                                    <div class="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Button -->
+                <div class="mt-8 text-center">
+                    <button onclick="handleLogout()"
+                        class="bg-gradient-to-r from-slate-700 to-slate-900 text-white px-12 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-3">
+                        <span>🚪</span>
+                        تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+<script>
+
+
+
+
+// ========================================
+// ⚙️ إعدادات النظام
+// ========================================
+// ========================================
+// ⚙️ إعدادات النظام
+// ========================================
+
+// 🔥 يجب إضافة البروتوكول (https://)
+const API_BASE_URL = 'https://travel-production-b5ed.up.railway.app'; 
+ 
+
+
+
+const SUPABASE_URL = "https://nyuscoqcoibodegjjlhm.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55dXNjb3Fjb2lib2RlZ2pqbGhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTY3NTIsImV4cCI6MjA3MzU5Mjc1Mn0.Qme5bS_6YZO54HZobETSha9sIVC1aRUra0cAX3XKfuY";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+window.userIsSubscribed = false;
+
+// ========================================
+// 🎨 حقن تنسيقات CSS (للتصميم والطباعة)
+// ========================================
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+    /* إخفاء السكرول أثناء التحميل فقط */
+    body.loading-mode { overflow: hidden; }
+
+    /* تنسيقات الطباعة */
+    @media print {
+        body * { visibility: hidden; }
+        #printablePlan, #printablePlan * { visibility: visible; }
+        #printablePlan { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; padding: 20px; }
+        .no-print { display: none !important; }
+        .prose { font-size: 12pt !important; color: black !important; width: 100% !important; text-align: right; direction: rtl; }
+        h2 { border-bottom: 1px solid #000; padding-bottom: 10px; }
+    }
+
+    /* أنيميشن ظهور سلس */
+    .fade-scale-in {
+        animation: fadeScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: scale(0.98) translateY(20px);
+    }
+    
+    @keyframes fadeScale {
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .locked-card { 
+        min-height: 220px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center;
+        transition: transform 0.3s ease;
+    }
+    .locked-card:hover { transform: translateY(-3px); }
+`;
+document.head.appendChild(styleSheet);
+
+// ========================================
+// 🧠 منطق المقابلة
+// ========================================
+const interviewQuestions = [
+    "كم عمرك؟",
+    "ما هي جنسيتك الحالية؟",
+    "ما هي حالتك الاجتماعية؟ (أعزب/متزوج/لديك أطفال)",
+    "كم عدد الأطفال لديك؟ (إذا لم يوجد اكتب 0)",
+    "ما هو مستواك الدراسي؟ (ثانوي، بكالوريوس، ماجستير...)",
+    "ما هو تخصصك أو مهنتك الحالية؟",
+    "كيف تقيم مستواك في اللغة الإنجليزية؟",
+    "هل تتحدث لغة الدولة التي اخترتها؟ (إذا كانت غير الإنجليزية)",
+    "ما هي الميزانية التقريبية التي رصدتها للهجرة؟",
+    "هل لديك أقارب أو أصدقاء في هذه الدولة؟"
+];
+
+let interviewState = {
+    active: false,
+    currentQuestionIndex: 0,
+    qaList: [], 
+    countryName: "",
+    countryFlag: "",
+    conversationId: "",
+    isAnalyzing: false 
+};
+
+// دالة مساعدة للأزرار
+function selectCustomCountry(name, flag) {
+    selectCountry({ name: name, flag: flag });
+}
+
+
+
+
+
+
+
+
+
+async function selectCountry(country) {
+    if (!currentUser) {
+        alert("🔒 يرجى تسجيل الدخول أولاً للبدء في الخطة.");
+        showPage('login');
+        return;
+    }
+
+    const fixedConversationId = `${country.name}_PLAN_${currentUser.id}`;
+    
+    // طباعة المعرف للتأكد من أنه ثابت
+    console.log("Checking Plan for ID:", fixedConversationId);
+
+    interviewState.countryName = country.name;
+    interviewState.countryFlag = country.flag;
+    interviewState.conversationId = fixedConversationId;
+    interviewState.active = true;
+    interviewState.currentQuestionIndex = 0;
+    interviewState.qaList = [];
+    interviewState.isAnalyzing = false;
+
+    const chatBox = document.getElementById('chatMessages');
+    chatBox.className = "space-y-3 md:space-y-4 mb-4 md:mb-6 max-h-[400px] md:max-h-[500px] overflow-y-auto p-3 md:p-4 bg-white/50 rounded-2xl";
+    chatBox.innerHTML = '';
+    
+    document.getElementById('countrySelection').classList.add('hidden');
+    document.getElementById('chatSection').classList.remove('hidden');
+    const analysisSection = document.getElementById('analysisSection');
+    if (analysisSection) analysisSection.classList.add('hidden');
+    chatBox.classList.remove('hidden');
+    
+    const footerNote = document.querySelector('#chatSection .text-center.mt-3');
+    if(footerNote) footerNote.style.display = 'none'; 
+
+    document.getElementById('selectedCountryFlag').textContent = country.flag;
+    document.getElementById('selectedCountryName').textContent = country.name;
+
+    showLoadingIndicator(true);
+    try {
+        const isSubscribed = await loadSubscriptionStatus(); 
+        
+        const res = await fetch(`${API_BASE_URL}/api/chat/history`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, conversationId: fixedConversationId })
+        });
+        
+        const data = await res.json();
+        
+        // 🔥 التعديل الهام هنا: جلب آخر عنصر في المصفوفة (الأحدث) بدلاً من الأول
+        // data.history[data.history.length - 1] بدلاً من data.history[0]
+        // نأخذ آخر عنصر في المصفوفة لأنه هو الأحدث
+const existingPlan = data.history && data.history.length > 0 ? data.history[data.history.length - 1] : null;
+
+        showLoadingIndicator(false);
+
+        if (existingPlan) {
+            renderFinalPlan(existingPlan.message, isSubscribed);
+            return; 
+        } else {
+            document.getElementById('inputArea').classList.remove('hidden');
+            startInterviewSequence();
+        }
+    } catch (e) {
+        console.error("History Check Error:", e);
+        showLoadingIndicator(false);
+        document.getElementById('inputArea').classList.remove('hidden');
+        startInterviewSequence();
+    }
+}
+
+
+
+
+
+function showLoadingIndicator(show) {
+    const chatBox = document.getElementById('chatMessages');
+    if (show) {
+        chatBox.innerHTML = '<div class="text-center text-gray-500 mt-10 animate-pulse">جاري البحث عن بياناتك المحفوظة... ⏳</div>';
+    } else {
+        chatBox.innerHTML = '';
+    }
+}
+
+// 2. تسلسل البداية
+async function startInterviewSequence() {
+    addBotMessage(`رائع! لقد اخترت ${interviewState.countryName} ${interviewState.countryFlag}`);
+    setTimeout(() => {
+        addBotMessage("سأطرح عليك بعض الأسئلة لفهم وضعك، وبعدها سأعطيك خطة تفصيلية شاملة 📋");
+        setTimeout(() => { askCurrentQuestion(); }, 1500);
+    }, 1000);
+}
+
+// 3. طرح الأسئلة
+function askCurrentQuestion() {
+    if (interviewState.currentQuestionIndex < interviewQuestions.length) {
+        const qText = interviewQuestions[interviewState.currentQuestionIndex];
+        addBotMessage(qText);
+    } else {
+        startAnalysis();
+    }
+}
+
+// 4. معالجة الإجابة
+async function handleUserInput() {
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    addUserMessage(message);
+    input.value = '';
+
+    if (interviewState.active) {
+        interviewState.qaList.push({
+            question: interviewQuestions[interviewState.currentQuestionIndex],
+            answer: message
+        });
+        interviewState.currentQuestionIndex++;
+        setTimeout(askCurrentQuestion, 800);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ========================================
+// 1. حقن تصميم الـ 3D Tiles
+// ========================================
+
+
+
+function injectAnalysisHTML() {
+    const oldOverlay = document.getElementById('analysisOverlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'analysisOverlay';
+    overlay.className = 'analysis-overlay-3d-pro hidden';
+    
+    overlay.innerHTML = `
+        <div class="card-3d-container">
+            <div class="holo-progress">
+                <svg viewBox="0 0 100 100" class="circular-chart-3d">
+                    <defs>
+                        <linearGradient id="gradient3d" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#22d3ee" /> 
+                            <stop offset="100%" stop-color="#3b82f6" /> 
+                        </linearGradient>
+                    </defs>
+                    <circle class="circle-bg-3d" cx="50" cy="50" r="40" />
+                    <circle id="progressCircle" class="circle-fill-3d" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <div class="percentage-text-3d" id="percentage">0%</div>
+            </div>
+
+            <div id="tilesStack" class="tiles-stack"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+
+// ========================================
+// 1. حقن التصميم (دائرة نظيفة + مربع عريض)
+// ========================================
+function injectAnalysisHTML() {
+    const oldOverlay = document.getElementById('analysisOverlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'analysisOverlay';
+    overlay.className = 'analysis-overlay-3d-pro hidden';
+    
+    overlay.innerHTML = `
+        <div class="card-3d-container">
+            <div class="holo-progress">
+                <svg viewBox="0 0 100 100" class="circular-chart-3d">
+                    <defs>
+                        <linearGradient id="gradient3d" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#22d3ee" /> 
+                            <stop offset="100%" stop-color="#3b82f6" /> 
+                        </linearGradient>
+                    </defs>
+                    <circle class="circle-bg-3d" cx="50" cy="50" r="40" />
+                    <circle id="progressCircle" class="circle-fill-3d" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <div class="percentage-text-3d" id="percentage">0%</div>
+            </div>
+
+            <div id="tilesStack" class="tiles-stack"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+// ========================================
+// 2. منطق التحليل (حسابات دقيقة للدائرة الجديدة)
+// ========================================
+async function startAnalysis() {
+    if (interviewState.isAnalyzing) return; 
+    interviewState.isAnalyzing = true;
+
+    injectAnalysisHTML();
+    const overlay = document.getElementById('analysisOverlay');
+    overlay.classList.remove('hidden');
+    document.body.classList.add('loading-mode');
+
+    document.getElementById('chatMessages').classList.add('hidden');
+    document.getElementById('inputArea').classList.add('hidden');
+
+    // طلب البيانات
+    const planPromise = fetch(`${API_BASE_URL}/api/generate-plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId: currentUser.id,
+            conversationId: interviewState.conversationId,
+            country: interviewState.countryName,
+            qaList: interviewState.qaList
+        })
+    }).then(r => r.json()).catch(err => ({ error: true }));
+
+    const subPromise = loadSubscriptionStatus();
+
+    // === الجمل المطلوبة ===
+    const stepsData = [
+        { icon: "📂", text: "جارِ تحليل معلوماتك الشخصية لبناء خطة هجرة مناسبة…" },
+        { icon: "⚖️", text: "جارِ مقارنة ملفك مع أحدث قوانين الهجرة لعام 2025…" },
+        { icon: "🚀", text: "جارِ البحث عن أسرع مسار يمكنك الهجرة به بناءً على بياناتك…" },
+        { icon: "📊", text: "جارِ تقييم فرص قبولك في كل برنامج هجرة متاح…" },
+        { icon: "📝", text: "جارِ إنشاء خطة تفصيلية خطوة بخطوة مخصصة لك…" },
+        { icon: "🔗", text: "جارِ تجهيز الإرشادات الرسمية والروابط المطلوبة…" }
+    ];
+
+    const progressCircle = document.getElementById('progressCircle');
+    const percentageText = document.getElementById('percentage');
+    const tilesStack = document.getElementById('tilesStack');
+
+    // حساب محيط الدائرة الجديد (2 * PI * 40) ≈ 251.2
+    const circumference = 251.2;
+
+    const totalTime = 120000; // 120 ثانية
+    const updateInterval = 100;
+    let currentTime = 0;
+    
+    const timePerStep = totalTime / stepsData.length;
+    let currentStepIndex = 0;
+
+    function addTile(stepInfo) {
+        const prevTile = tilesStack.lastElementChild;
+        if (prevTile) {
+            prevTile.classList.remove('active');
+            prevTile.classList.add('done');
+            prevTile.querySelector('.icon-bubble').innerHTML = '✔'; 
+        }
+
+        const tile = document.createElement('div');
+        tile.className = 'tile-item active';
+        tile.innerHTML = `
+            <div class="icon-bubble">${stepInfo.icon}</div>
+            <div class="tile-text">${stepInfo.text}</div>
+        `;
+        
+        tilesStack.appendChild(tile);
+        requestAnimationFrame(() => {
+            tile.classList.add('visible');
+            tile.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    }
+
+    addTile(stepsData[0]);
+
+    const timer = setInterval(async () => {
+        currentTime += updateInterval;
+
+        // تحديث النسبة المئوية
+        let percent = Math.min((currentTime / totalTime) * 100, 100);
+        percentageText.textContent = Math.floor(percent) + '%';
+        
+        // حساب حركة الدائرة بدقة
+        const offset = circumference - (percent / 100) * circumference;
+        if(progressCircle) progressCircle.style.strokeDashoffset = offset;
+
+        if (currentTime >= (currentStepIndex + 1) * timePerStep && currentStepIndex < stepsData.length - 1) {
+            currentStepIndex++;
+            addTile(stepsData[currentStepIndex]);
+        }
+
+        if (currentTime >= totalTime) {
+            clearInterval(timer);
+            
+            const lastTile = tilesStack.lastElementChild;
+            if (lastTile) {
+                lastTile.classList.remove('active');
+                lastTile.classList.add('done');
+                lastTile.querySelector('.icon-bubble').innerHTML = '✔';
+            }
+
+            try {
+                const [planData, isSubscribed] = await Promise.all([planPromise, subPromise]);
+                
+                setTimeout(() => {
+                    document.body.classList.remove('loading-mode');
+                    overlay.remove(); 
+                    if (planData && planData.plan) {
+                        renderFinalPlan(planData.plan, isSubscribed);
+                    } else {
+                        alert("حدث خطأ بسيط، حاول مرة أخرى.");
+                        location.reload();
+                    }
+                }, 1500);
+
+            } catch (e) {
+                console.error(e);
+                alert("فشل الاتصال.");
+                location.reload();
+            }
+        }
+    }, updateInterval);
+}
+
+
+
+
+
+// ========================================
+// 3. عرض الخطة النهائية (تصميم جديد كلياً)
+// ========================================
+
+// ✅ تعريف دالة زر فك القفل (لإصلاح المشكلة)
+window.handleUnlockClick = function() {
+    showPage('subscription');
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ========================================
+// 3. عرض الخطة النهائية (تصميم Dark Mode الجديد)
+// ========================================
+
+// دالة الانتقال لصفحة الاشتراك عند الضغط على القفل
+window.handleUnlockClick = function() {
+    showPage('subscription');
+};
+
+
+
+
+
+async function renderFinalPlan(planText, preloadedSubStatus = null) {
+    const chatBox = document.getElementById('chatMessages');
+    document.getElementById('inputArea').classList.add('hidden');
+    document.getElementById('analysisOverlay')?.remove(); 
+
+    chatBox.innerHTML = '';
+    chatBox.className = "w-full mt-4"; 
+    chatBox.classList.remove('hidden');
+
+    const isSubscribed = preloadedSubStatus !== null ? preloadedSubStatus : await loadSubscriptionStatus();
+    
+    const planDiv = document.createElement('div');
+    planDiv.className = "fade-scale-in w-full max-w-6xl mx-auto"; 
+    planDiv.id = "printablePlan";
+
+    if (!isSubscribed) {
+        planDiv.innerHTML = `
+            <div class="locked-container">
+                
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-5xl font-black text-white mb-3 drop-shadow-lg">نتائج خطة الهجرة 🔒</h2>
+                    <p class="text-slate-300 text-lg">تم تجهيز 3 تقارير شاملة تحتوي على كافة التفاصيل</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 px-4">
+                    
+                    <div class="locked-card">
+                        <div class="lock-overlay">
+                            <div class="lock-icon-3d">
+                                <svg class="lock-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="text-white font-bold text-xl mt-3 tracking-wide drop-shadow-md">تقرير مقفل</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-cyan-400 mb-8 z-0">📅 الجدول الزمني</h3>
+                        
+                        <div class="fake-content w-full px-2">
+                            <div class="fake-line w-full"></div><div class="fake-line w-3/4"></div><div class="fake-line w-full"></div>
+                            <br><div class="fake-line w-5/6"></div><div class="fake-line w-full"></div><div class="fake-line w-2/3"></div>
+                            <br><div class="fake-line w-full"></div><div class="fake-line w-4/5"></div><div class="fake-line w-full"></div>
+                            <br><div class="fake-line w-3/4"></div><div class="fake-line w-full"></div>
+                        </div>
+                    </div>
+
+                    <div class="locked-card">
+                        <div class="lock-overlay">
+                            <div class="lock-icon-3d">
+                                <svg class="lock-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="text-white font-bold text-xl mt-3 tracking-wide drop-shadow-md">تقرير مقفل</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-cyan-400 mb-8 z-0">💰 التكاليف المالية</h3>
+                        
+                        <div class="fake-content w-full px-2">
+                            <div class="fake-line w-2/3 mx-auto"></div><div class="fake-line w-1/2 mx-auto"></div>
+                            <br><div class="fake-line w-3/4 mx-auto"></div><div class="fake-line w-2/3 mx-auto"></div>
+                            <br><div class="fake-line w-full"></div><div class="fake-line w-5/6"></div>
+                            <br><div class="fake-line w-4/5 mx-auto"></div><div class="fake-line w-3/4 mx-auto"></div>
+                        </div>
+                    </div>
+
+                    <div class="locked-card">
+                        <div class="lock-overlay">
+                            <div class="lock-icon-3d">
+                                <svg class="lock-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="text-white font-bold text-xl mt-3 tracking-wide drop-shadow-md">تقرير مقفل</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-cyan-400 mb-8 z-0">📂 الوثائق المطلوبة</h3>
+                        
+                        <div class="fake-content w-full px-2">
+                            <div class="fake-line w-full"></div><div class="fake-line w-full"></div><div class="fake-line w-3/4"></div>
+                            <br><div class="fake-line w-5/6"></div><div class="fake-line w-full"></div><div class="fake-line w-4/5"></div>
+                            <br><div class="fake-line w-full"></div><div class="fake-line w-2/3"></div><div class="fake-line w-full"></div>
+                            <br><div class="fake-line w-3/4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blue-cta-card">
+                    <div class="w-full max-w-4xl text-center"> 
+                        <h3 class="text-3xl md:text-5xl font-black text-white mb-4 leading-tight drop-shadow-md">
+                            احصل على الخطة الكاملة الآن! 🚀
+                        </h3>
+                        <div class="flex items-center justify-center gap-4 mb-8">
+                            <span class="text-2xl text-blue-200 font-bold">اشتراك كامل بـ</span>
+                            <span class="text-6xl font-black text-yellow-300 drop-shadow-lg">$29</span>
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-4 w-full">
+                            <button onclick="handleUnlockClick()" class="w-full md:w-auto bg-white text-blue-800 hover:bg-yellow-50 font-black py-4 px-12 rounded-2xl shadow-2xl hover:shadow-white/20 transition transform hover:scale-105 text-xl md:text-2xl flex items-center justify-center gap-3">
+                                <span>🔓</span> افتح الخطة فوراً
+                            </button>
+                            <button onclick="startOver()" class="w-full md:w-auto text-white/80 hover:text-white font-semibold py-4 px-6 rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                حذف والبدء من جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        `;
+    } else {
+        // (كود المشتركين يبقى كما هو)
+        const formattedText = planText
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-900">$1</strong>') 
+            .replace(/^- (.*)/gm, '<li class="flex items-start gap-2"><span class="text-cyan-500 mt-1">●</span><span>$1</span></li>') 
+            .replace(/\n/g, '<br>');
+
+        planDiv.innerHTML = `
+            <div class="paper-bg rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden text-right" dir="rtl">
+                <div class="bg-slate-900 text-white p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-4xl font-black mb-2 flex items-center gap-3">
+                            <span class="text-4xl">${interviewState.countryFlag}</span>
+                            خطة الهجرة: ${interviewState.countryName}
+                        </h1>
+                    </div>
+                    <div class="flex items-center gap-3 no-print">
+                        <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-bold backdrop-blur transition flex items-center gap-2">
+                            حفظ PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 md:p-10">
+                    <div class="prose prose-lg prose-slate max-w-none">
+                        ${formattedText}
+                    </div>
+                </div>
+                <div class="bg-slate-50 border-t border-slate-100 p-8 text-center no-print mt-8">
+                    <button onclick="startOver()" class="text-red-600 hover:text-red-700 font-bold border border-red-200 hover:bg-red-50 px-6 py-3 rounded-xl transition flex items-center justify-center gap-2 mx-auto">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        حذف هذه الخطة وإنشاء جديدة
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    chatBox.appendChild(planDiv);
+}
+
+
+
+
+
+
+
+// ========================================
+// 🔄 البدء من جديد (حذف الخطة من قاعدة البيانات)
+// ========================================
+async function startOver() {
+    if (!currentUser || !interviewState.conversationId) return;
+
+    if (confirm("هل أنت متأكد؟ سيتم حذف الخطة الحالية لهذه الدولة نهائياً والبدء من جديد.")) {
+        try {
+            // إرسال طلب للسيرفر لحذف السجل
+            await fetch(`${API_BASE_URL}/api/chat/clear`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId: currentUser.id, 
+                    conversationId: interviewState.conversationId 
+                })
+            });
+
+            // إعادة التوجيه
+            handleChatBack();
+        } catch (e) {
+            console.error("Delete Error:", e);
+            alert("حدث خطأ أثناء الحذف");
+        }
+    }
+}
+
+function handleChatBack() {
+    const countrySelection = document.getElementById('countrySelection');
+    const chatSection = document.getElementById('chatSection');
+    const analysisSection = document.getElementById('analysisSection');
+    const inputArea = document.getElementById('inputArea');
+
+    const isDeepInChat = !chatSection.classList.contains('hidden') || (analysisSection && !analysisSection.classList.contains('hidden'));
+
+    if (isDeepInChat) {
+        chatSection.classList.add('hidden');
+        if (analysisSection) analysisSection.classList.add('hidden');
+        countrySelection.classList.remove('hidden');
+        
+        interviewState.active = false;
+        interviewState.currentQuestionIndex = 0;
+        interviewState.qaList = [];
+        interviewState.isAnalyzing = false;
+        
+        const chatBox = document.getElementById('chatMessages');
+        chatBox.className = "space-y-3 md:space-y-4 mb-4 md:mb-6 max-h-[400px] md:max-h-[500px] overflow-y-auto p-3 md:p-4 bg-white/50 rounded-2xl";
+        chatBox.innerHTML = '';
+        
+        if(inputArea) inputArea.classList.remove('hidden');
+    } else {
+        showPage('home');
+    }
+}
+
+function goHome() {
+    handleChatBack();
+}
+
+// ========================================
+// UI HELPERS
+// ========================================
+function addBotMessage(text) {
+    const chatBox = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'flex justify-start mb-4 slide-in';
+    div.innerHTML = `<div class="bg-gradient-to-r from-blue-800 to-cyan-600 text-white px-5 py-3 rounded-2xl rounded-tr-none shadow-md max-w-[85%]">${text}</div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addUserMessage(text) {
+    const chatBox = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'flex justify-end mb-4 slide-in';
+    div.innerHTML = `<div class="bg-white text-gray-800 px-5 py-3 rounded-2xl rounded-tl-none shadow-md border border-gray-200 max-w-[85%]">${text}</div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ========================================
+// AUTH & SUBSCRIPTION
+// ========================================
+
+function ensureMsgBox(formId, msgId) {
+    const form = document.getElementById(formId);
+    if (!form) return null;
+    let box = document.getElementById(msgId);
+    if (!box) { box = document.createElement('div'); box.id = msgId; box.className = 'mt-3 text-sm'; form.appendChild(box); }
+    return box;
+}
+
+function showInlineMsg(formId, msgId, type, text) {
+    const box = ensureMsgBox(formId, msgId);
+    if (!box) return;
+    box.className = `mt-3 text-sm ${type === 'error' ? 'text-red-600' : 'text-green-600'}`;
+    box.textContent = text;
+}
+
+function setLoading(btn, isLoading, loadingText = '...') {
+    if (!btn) return;
+    if (isLoading) {
+        btn.dataset.oldText = btn.innerText;
+        btn.disabled = true;
+        btn.classList.add('opacity-70','cursor-not-allowed');
+        btn.innerText = btn.innerText + ' ' + loadingText;
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70','cursor-not-allowed');
+        if (btn.dataset.oldText) btn.innerText = btn.dataset.oldText;
+    }
+}
+
+function updateAuthUI() {
+    const navbarAuthIcon = document.getElementById('navbarAuthIcon');
+    const navbarAuthText = document.getElementById('navbarAuthText');
+    const sidebarAuthLink = document.getElementById('sidebarAuthLink');
+    if (currentUser) {
+        if(navbarAuthIcon) navbarAuthIcon.textContent = '👤';
+        if(navbarAuthText) navbarAuthText.textContent = 'حسابي';
+        if(sidebarAuthLink) sidebarAuthLink.innerHTML = '👤 حسابي';
+    } else {
+        if(navbarAuthIcon) navbarAuthIcon.textContent = '🔐';
+        if(navbarAuthText) navbarAuthText.textContent = 'تسجيل الدخول';
+        if(sidebarAuthLink) sidebarAuthLink.innerHTML = '🔐 تسجيل الدخول';
+    }
+}
+
+function handleAuthNavigation() {
+    if (currentUser) { showPage('account'); loadSubscriptionStatus(); } else { showPage('login'); }
+    closeSidebar();
+}
+
+async function handleLogin() {
+    const emailEl = document.getElementById('loginEmail');
+    const passEl = document.getElementById('loginPassword');
+    const btn = document.querySelector('#loginForm button[type="submit"]');
+    const email = (emailEl?.value || '').trim();
+    const password = passEl?.value || '';
+
+    if (!email || !password) { showInlineMsg('loginForm','loginMsg','error','❌ الرجاء تعبئة البيانات'); return; }
+    setLoading(btn, true, 'جاري الدخول...');
+    
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUser = data?.user || null;
+        updateAuthUI();
+        showPage('account');
+        await loadSubscriptionStatus();
+    } catch (err) {
+        showInlineMsg('loginForm','loginMsg','error', '❌ فشل الدخول: تأكد من البيانات');
+    } finally { setLoading(btn, false); }
+}
+
+async function handleSignup() {
+    const emailEl = document.getElementById('signupEmail');
+    const passEl = document.getElementById('signupPassword');
+    const pass2El = document.getElementById('signupPasswordConfirm');
+    const btn = document.querySelector('#signupForm button[type="submit"]');
+
+    if (passEl.value !== pass2El.value) { showInlineMsg('signupForm','signupMsg','error','❌ كلمات المرور غير متطابقة'); return; }
+    
+    setLoading(btn, true, 'جاري الإنشاء...');
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({ email: emailEl.value, password: passEl.value });
+        if (error) throw error;
+        if(data?.user?.id) supabaseClient.from('profiles').upsert({ id: data.user.id, email: emailEl.value }).then(()=>{}).catch(()=>{});
+        showInlineMsg('signupForm','signupMsg','success','✅ تم الإنشاء! سجل دخولك الآن.');
+        setTimeout(() => showPage('login'), 1500);
+    } catch (err) {
+        showInlineMsg('signupForm','signupMsg','error', '❌ حدث خطأ في الإنشاء');
+    } finally { setLoading(btn, false); }
+}
+
+async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    updateAuthUI();
+    showPage('home');
+}
+
+async function checkAuthStatus() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    currentUser = user || null;
+    updateAuthUI();
+}
+
+async function loadSubscriptionStatus() {
+    if (!currentUser) {
+        window.userIsSubscribed = false;
+        return false;
+    }
+
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+             const { data: { user } } = await supabaseClient.auth.getUser();
+             if(!user) return false;
+        }
+        
+        const token = session?.access_token;
+        if (!token) return false;
+
+        const response = await fetch(`${API_BASE_URL}/api/subscription`, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`, 
+                'Content-Type': 'application/json' 
+            }
+        });
+        
+        const result = await response.json();
+        
+        window.userIsSubscribed = !!(result.subscription && result.subscription.status === 'active');
+        
+        const statusDiv = document.getElementById('subscriptionStatus');
+        if (statusDiv) {
+            statusDiv.innerHTML = window.userIsSubscribed 
+                ? `<div class="bg-green-50 p-6 rounded-xl text-center border-2 border-green-200"><p class="text-green-700 font-bold">✅ اشتراكك نشط</p></div>` 
+                : `<div class="bg-gray-50 p-6 rounded-xl text-center"><p class="text-gray-800 font-bold mb-3">لا يوجد اشتراك نشط</p><button onclick="showPage('subscription')" class="bg-blue-600 text-white px-6 py-2 rounded-full">اشترك الآن</button></div>`;
+        }
+        if(document.getElementById('accountEmail') && currentUser) {
+             document.getElementById('accountEmail').textContent = currentUser.email;
+        }
+
+        return window.userIsSubscribed;
+
+    } catch (error) { 
+        console.error("Subscription check failed:", error);
+        window.userIsSubscribed = false; 
+        return false;
+    }
+}
+
+// ========================================
+// PAGE & INIT
+// ========================================
+function showPage(pageName) {
+    if ((pageName === 'chat' || pageName === 'subscription') && !currentUser) { showPage('login'); return; }
+    ['homePage', 'chatPage', 'subscriptionPage', 'loginPage', 'signupPage', 'accountPage', 'zaincashPage', 'binanceInfoPage'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(pageName + 'Page') || document.getElementById(pageName);
+    if (target) target.classList.remove('hidden');
+    
+    if (pageName === 'account') loadSubscriptionStatus();
+    
+    window.scrollTo(0, 0);
+    closeSidebar();
+}
+
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('active'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); }
+
+document.getElementById('loginForm')?.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
+document.getElementById('signupForm')?.addEventListener('submit', (e) => { e.preventDefault(); handleSignup(); });
+document.getElementById('sendBtn').addEventListener('click', handleUserInput);
+document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUserInput(); });
+
+window.addEventListener('DOMContentLoaded', () => {
+    checkAuthStatus();
+    supabaseClient.auth.onAuthStateChange((_e, session) => { currentUser = session?.user || null; updateAuthUI(); });
+    
+    const countries = [
+        { name: 'كندا', flag: '🇨🇦' }, { name: 'ألمانيا', flag: '🇩🇪' }, { name: 'أمريكا', flag: '🇺🇸' },
+        { name: 'بريطانيا', flag: '🇬🇧' }, { name: 'أستراليا', flag: '🇦🇺' }, { name: 'فرنسا', flag: '🇫🇷' }
+    ];
+    const container = document.getElementById('countryButtons');
+    if (container) {
+        countries.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'card-3d bg-white rounded-2xl p-4 md:p-6 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-cyan-400';
+            btn.innerHTML = `<div class="text-4xl md:text-6xl mb-2 md:mb-3">${c.flag}</div><div class="text-lg md:text-2xl font-bold text-gray-800">${c.name}</div>`;
+            btn.onclick = () => selectCountry(c);
+            container.appendChild(btn);
+        });
+    }
+});
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+camera.position.z = 5;
+const geo = new THREE.BufferGeometry();
+const vert = []; 
+for(let i=0; i<1000; i++) vert.push((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
+geo.setAttribute('position', new THREE.Float32BufferAttribute(vert, 3));
+const particles = new THREE.Points(geo, new THREE.PointsMaterial({color: 0x0891b2, size: 0.05}));
+scene.add(particles);
+function animate() { requestAnimationFrame(animate); particles.rotation.y += 0.001; renderer.render(scene, camera); }
+animate();
+window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+</script>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
