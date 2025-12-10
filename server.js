@@ -244,15 +244,21 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     }
 });
 
-// ===============================================
-// 📂 Static Files
-// ===============================================
-app.use(express.static(path.join(__dirname)));
+
+
+// ✅ أضف هذا الكود الجديد مكانه
+// تحديد مجلد public كمكان للملفات الثابتة
+app.use(express.static(path.join(__dirname, "public")));
+
+// توجيه كل الطلبات إلى index.html الموجود داخل public
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running securely on port ${PORT}`);
 });
+
