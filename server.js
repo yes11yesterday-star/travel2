@@ -1,5 +1,5 @@
 // ==========================================================
-// 🌍 خبير الهجرة - Server (Secure & Updated)
+// 🌍 خبير الهجرة - Server (Optimized & Fast)
 // ==========================================================
 const express = require("express");
 const cors = require("cors");
@@ -11,9 +11,8 @@ const { createClient } = require("@supabase/supabase-js");
 const app = express();
 
 // ✅ 1. إعدادات الأمان (CORS)
-// يفضل تحديد الدومين الخاص بفرونت-إند بدلاً من * عند الرفع للاستضافة
 app.use(cors({
-    origin: "*", // استبدل النجمة برابط موقعك عند النشر، مثلاً: "https://my-app.com"
+    origin: "*", 
     methods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
@@ -31,13 +30,11 @@ if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 }
 
 // 🔗 Supabase
-// نستخدم Service Role Key لكن بحذر شديد داخل السيرفر فقط
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // ===============================================
 // 🛡️ Middleware: التحقق من صحة المستخدم (Auth Check)
 // ===============================================
-// هذه الدالة هي الحارس، تمنع أي طلب لا يحمل توكن صحيح
 const authenticateUser = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -47,14 +44,13 @@ const authenticateUser = async (req, res, next) => {
 
     const token = authHeader.replace("Bearer ", "").trim();
     
-    // التحقق من التوكن عبر Supabase
+    // التحقق من التوكن
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
       return res.status(401).json({ error: "جلسة غير صالحة أو منتهية" });
     }
 
-    // ✅ حفظ بيانات المستخدم في الطلب لاستخدامها لاحقاً
     req.user = user;
     next();
   } catch (err) {
@@ -64,24 +60,20 @@ const authenticateUser = async (req, res, next) => {
 };
 
 // ===============================================
-// 🔐 Auth Endpoints (Public)
+// 🔐 Auth Endpoints
 // ===============================================
 
-// إنشاء حساب
 app.post("/api/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    // استخدام admin.createUser لتجاوز تأكيد الإيميل إذا أردت، أو استخدم الطريقة العادية
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // تفعيل الحساب فوراً
+      email_confirm: true,
     });
 
     if (error) throw error;
 
-    // إنشاء بروفايل للمستخدم
     await supabase.from("profiles").insert([{ 
         user_id: data.user.id, 
         display_name: email.split('@')[0] 
@@ -93,7 +85,6 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-// تسجيل دخول
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -106,16 +97,14 @@ app.post("/api/login", async (req, res) => {
 });
 
 // ===============================================
-// 💳 Subscription (Protected)
+// 💳 Subscription
 // ===============================================
-// لاحظ إضافة authenticateUser هنا
 app.get("/api/subscription", authenticateUser, async (req, res) => {
   try {
-    // نستخدم req.user.id الذي جلبناه من التوكن، لا نعتمد على الـ body
     const { data: subscription, error } = await supabase
       .from("subscriptions")
       .select("*")
-      .eq("user_id", req.user.id) // ✅ آمن
+      .eq("user_id", req.user.id)
       .maybeSingle();
 
     if (error) throw error;
@@ -126,23 +115,19 @@ app.get("/api/subscription", authenticateUser, async (req, res) => {
 });
 
 // ===============================================
-// 🧠 توليد الخطة (Protected + Secure AI Prompt)
+// 🧠 توليد الخطة (AI)
 // ===============================================
 app.post("/api/generate-plan", authenticateUser, async (req, res) => {
   try {
-    // ❌ لا نأخذ userId من الـ body
-    // ✅ نأخذ فقط البيانات الضرورية
     const { conversationId, country, qaList } = req.body;
-    const userId = req.user.id; // من التوكن الآمن
+    const userId = req.user.id;
 
     if (!qaList || !country) {
         return res.status(400).json({ error: "بيانات ناقصة" });
     }
 
-    // تحويل الأسئلة لنص مع حماية ضد التلاعب
     let interviewText = qaList.map(item => `- س: ${item.question}\n- ج: ${item.answer}`).join("\n");
 
-    // تحسين الـ Prompt لمنع حقن الأوامر
     const planPrompt = `
     انت خبير هجرة ومستشار قانوني دولي.
     مهمتك: إنشاء خطة هجرة مفصلة لدولة (${country}).
@@ -153,9 +138,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
     --- نهاية بيانات المستخدم ---
 
     بناءً على البيانات أعلاه، اكتب تقرير مفصل يحتوي على:
-    1. 📊 تحليل الملف الشخصي (نقاط القوة/الضعف).
-    2. ✈️ الفيزا المقترحة (الخيار الأفضل).
-    3. 💰 التكاليف المتوقعة (رسوم، معيشة).
+    1. 📊 تحليل الملف الشخصي.
+    2. ✈️ الفيزا المقترحة.
+    3. 💰 التكاليف المتوقعة.
     4. 📝 المستندات المطلوبة.
     5. ⏳ الجدول الزمني.
     6. 💡 نصائح لزيادة القبول.
@@ -171,10 +156,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
 
     const planText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "حدث خطأ أثناء توليد الخطة.";
 
-    // ✅ حفظ الخطة في قاعدة البيانات (ربط آمن مع user_id)
     const { error: insertError } = await supabase.from("chat_history").insert([
       {
-        user_id: userId, // آمن
+        user_id: userId,
         conversation_id: conversationId,
         role: "assistant",
         message: planText,
@@ -197,44 +181,45 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
 });
 
 // ===============================================
-// 💬 إدارة المحادثات (New & Protected)
+// 💬 إدارة المحادثات (تم التحسين هنا للسرعة)
 // ===============================================
 
-// ✅ جديد: استرجاع الرسائل القديمة (عشان ما تضيع)
 app.get("/api/chat/history", authenticateUser, async (req, res) => {
     try {
-        const { conversationId } = req.query; // نأخذ رقم المحادثة من الرابط
+        const { conversationId } = req.query;
         const userId = req.user.id;
 
         if (!conversationId) {
             return res.status(400).json({ error: "Conversation ID required" });
         }
 
+        // 🔥 التعديل: قمنا بإضافة limit لمنع تحميل بيانات ضخمة جداً
         const { data, error } = await supabase
             .from("chat_history")
-            .select("*")
-            .eq("user_id", userId) // شرط أساسي: المستخدم يرى رسائله فقط
+            .select("role, message, created_at, is_plan") // نختار فقط الأعمدة المهمة لتخفيف الحمل
+            .eq("user_id", userId)
             .eq("conversation_id", conversationId)
-            .order("created_at", { ascending: true }); // ترتيب زمني
+            .order("created_at", { ascending: true })
+            .limit(100); // أقصى حد 100 رسالة لضمان السرعة
 
         if (error) throw error;
         res.json({ history: data });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Fetch History Error:", err.message);
+        res.status(500).json({ error: "فشل جلب الرسائل" });
     }
 });
 
-// مسح المحادثة
 app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
-        const userId = req.user.id; // آمن من التوكن
+        const userId = req.user.id;
 
         const { error } = await supabase
             .from("chat_history")
             .delete()
-            .eq("user_id", userId) // ✅ يمسح فقط رسائل هذا المستخدم
+            .eq("user_id", userId)
             .eq("conversation_id", conversationId);
             
         if (error) throw error;
@@ -244,21 +229,16 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     }
 });
 
-
-
-// ✅ أضف هذا الكود الجديد مكانه
-// تحديد مجلد public كمكان للملفات الثابتة
+// ===============================================
+// 📂 Static Files
+// ===============================================
 app.use(express.static(path.join(__dirname, "public")));
 
-// توجيه كل الطلبات إلى index.html الموجود داخل public
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running securely on port ${PORT}`);
 });
-
