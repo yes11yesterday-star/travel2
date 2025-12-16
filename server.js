@@ -36,11 +36,17 @@ const authLimiter = rateLimit({
 // 🔒 2. إعدادات CORS (تقييد النطاق)
 // ===============================================
 // ملاحظة: استبدل الروابط أدناه برابط موقعك الحقيقي عند الرفع
+
+
+
 const allowedOrigins = [
   "http://localhost:3000", 
-  "http://localhost:5173", // إذا كنت تستخدم Vite
-  "https://your-production-domain.com" // 👈 ضع رابط موقعك الحقيقي هنا
+  "http://localhost:5173", 
+  "https://travel2-3sms.onrender.com" // ✅ تم إضافة رابط موقعك الحقيقي
 ];
+
+
+
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -298,3 +304,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running securely on port ${PORT}`);
 });
+
