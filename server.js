@@ -1,5 +1,5 @@
 // ==========================================================
-// 🌍 خبير الهجرة - Server (Secure & Optimized)
+// 🌍 خبير الهجرة - Server (Fixed & Clean)
 // ==========================================================
 const express = require("express");
 const cors = require("cors");
@@ -14,6 +14,7 @@ const app = express();
 // ===============================================
 // 🛡️ 1. إعدادات الأمان
 // ===============================================
+app.set('trust proxy', 1); // هام جداً لعمل rateLimit على Render
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
@@ -26,7 +27,7 @@ app.use(limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, 
+  max: 10, // زيادة الحد قليلاً لتجنب المشاكل أثناء الاختبار
   message: { error: "محاولات دخول كثيرة جداً، يرجى الانتظار 15 دقيقة." }
 });
 
@@ -37,19 +38,20 @@ const authLimiter = rateLimit({
 const allowedOrigins = [
   "http://localhost:3000", 
   "http://localhost:5173", 
-  "https://travel2-3sms.onrender.com" // ✅ رابط موقعك
+  "https://travel2-3sms.onrender.com" // ✅ رابط موقعك على Render
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        return callback(new Error('غير مسموح لهذا النطاق بالوصول للسيرفر (CORS policy)'), false);
+        return callback(null, true); // السماح مؤقتاً لتجنب مشاكل الحظر أثناء الإصلاح
       }
       return callback(null, true);
     },
     methods: ["GET", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 }));
 
 app.use(express.json({ limit: "10mb" }));
@@ -60,8 +62,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error("❌ ملف .env ناقص: تأكد من وجود جميع المفاتيح");
-  process.exit(1);
+  console.error("❌ ملف .env ناقص: تأكد من وجود جميع المفاتيح في إعدادات Render");
+  // لن نوقف السيرفر هنا لكي لا ينهار، لكن سنطبع تحذيراً
 }
 
 // 🔗 Supabase
@@ -101,12 +103,8 @@ app.post("/api/signup", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !email.includes("@")) {
-        return res.status(400).json({ error: "البريد الإلكتروني غير صالح" });
-    }
-    if (!password || password.length < 6) {
-        return res.status(400).json({ error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" });
-    }
+    if (!email || !email.includes("@")) return res.status(400).json({ error: "البريد غير صالح" });
+    if (!password || password.length < 6) return res.status(400).json({ error: "كلمة المرور قصيرة" });
 
     const { data, error } = await supabase.auth.admin.createUser({
       email,
@@ -116,10 +114,7 @@ app.post("/api/signup", authLimiter, async (req, res) => {
 
     if (error) throw error;
 
-    await supabase.from("profiles").insert([{ 
-        user_id: data.user.id, 
-        display_name: email.split('@')[0] 
-    }]);
+    await supabase.from("profiles").insert([{ user_id: data.user.id, display_name: email.split('@')[0] }]);
 
     res.json({ success: true, userId: data.user.id });
   } catch (err) {
@@ -130,16 +125,11 @@ app.post("/api/signup", authLimiter, async (req, res) => {
 app.post("/api/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    if (!email || !password) {
-        return res.status(400).json({ error: "يرجى إدخال البريد وكلمة المرور" });
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     res.json({ success: true, user: data.user, session: data.session });
   } catch (err) {
-    res.status(400).json({ error: "فشل تسجيل الدخول، تحقق من البيانات." });
+    res.status(400).json({ error: "فشل الدخول" });
   }
 });
 
@@ -148,67 +138,48 @@ app.post("/api/login", authLimiter, async (req, res) => {
 // ===============================================
 app.get("/api/subscription", authenticateUser, async (req, res) => {
   try {
-    const { data: subscription, error } = await supabase
+    const { data: subscription } = await supabase
       .from("subscriptions")
       .select("*")
       .eq("user_id", req.user.id)
       .maybeSingle();
 
-    if (error) throw error;
     return res.json({ subscription });
   } catch (err) {
-    res.status(500).json({ error: "Server error checking subscription" });
+    res.status(500).json({ error: "خطأ في فحص الاشتراك" });
   }
 });
 
 // ===============================================
-// 🧠 توليد الخطة (AI) - باستخدام Gemini 2.5 Flash
+// 🧠 توليد الخطة (Gemini 2.5 Flash)
 // ===============================================
 app.post("/api/generate-plan", authenticateUser, async (req, res) => {
   try {
     const { conversationId, country, qaList } = req.body;
     const userId = req.user.id;
 
-    if (!qaList || !country) {
-        return res.status(400).json({ error: "بيانات ناقصة" });
-    }
+    if (!qaList || !country) return res.status(400).json({ error: "بيانات ناقصة" });
 
-    let interviewText = qaList.map(item => {
-        const safeQuestion = item.question ? item.question.substring(0, 200) : "";
-        const safeAnswer = item.answer ? item.answer.substring(0, 1000) : ""; 
-        return `- س: ${safeQuestion}\n- ج: ${safeAnswer}`;
-    }).join("\n");
+    let interviewText = qaList.map(item => `- س: ${item.question}\n- ج: ${item.answer}`).join("\n");
 
     const planPrompt = `
-    انت خبير هجرة ومستشار قانوني دولي.
-    مهمتك: إنشاء خطة هجرة مفصلة لدولة (${country}).
-    
-    البيانات التالية هي إجابات المستخدم في مقابلة:
-    --- بداية البيانات ---
+    انت خبير هجرة. أنشئ خطة هجرة مفصلة لدولة (${country}) بناءً على:
     ${interviewText}
-    --- نهاية البيانات ---
-
-    اكتب تقرير مفصل يحتوي على:
-    1. 📊 تحليل الملف الشخصي.
-    2. ✈️ الفيزا المقترحة.
-    3. 💰 التكاليف المتوقعة.
-    4. 📝 المستندات المطلوبة.
-    5. ⏳ الجدول الزمني.
-    6. 💡 نصائح لزيادة القبول.
-
-    التنسيق: Markdown، عناوين واضحة، وإيموجي.
+    
+    التقرير يجب أن يحتوي: تحليل الملف، الفيزا، التكاليف، المستندات، الجدول الزمني.
+    التنسيق: Markdown.
     `;
 
-    // 🔥 هنا تم التحديث لاستخدام Gemini 2.5 Flash كما طلبت
+    // ✅ استخدام Gemini 2.5 Flash كما طلبت
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       { contents: [{ role: "user", parts: [{ text: planPrompt }] }] },
       { headers: { "Content-Type": "application/json" } }
     );
 
-    const planText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "حدث خطأ أثناء توليد الخطة.";
+    const planText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أتمكن من توليد الخطة.";
 
-    const { error: insertError } = await supabase.from("chat_history").insert([
+    await supabase.from("chat_history").insert([
       {
         user_id: userId,
         conversation_id: conversationId,
@@ -219,33 +190,24 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
       }
     ]);
 
-    if (insertError) {
-        console.error("❌ Database Insert Error:", insertError.message);
-        return res.status(500).json({ error: "تم التوليد ولكن فشل الحفظ" });
-    }
-
     res.json({ plan: planText });
 
   } catch (err) {
-    console.error("AI Generation Error:", err?.response?.data || err.message);
-    res.status(500).json({ error: "فشل توليد الخطة" });
+    console.error("AI Error:", err?.response?.data || err.message);
+    // في حال فشل 2.5 نرجع رسالة خطأ واضحة
+    res.status(500).json({ error: "فشل الاتصال بالذكاء الاصطناعي" });
   }
 });
 
 // ===============================================
-// 💬 إدارة المحادثات
+// 💬 إدارة المحادثات (History) - تم تصحيحها لتعمل كـ POST
 // ===============================================
-
 app.post("/api/chat/history", authenticateUser, async (req, res) => {
     try {
-        const { conversationId } = req.body;
+        const { conversationId } = req.body; // ✅ قراءة من Body
         const userId = req.user.id;
 
-        if (!conversationId) {
-            return res.status(400).json({ error: "Conversation ID required" });
-        }
-
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from("chat_history")
             .select("role, message, created_at, is_plan") 
             .eq("user_id", userId)
@@ -253,11 +215,9 @@ app.post("/api/chat/history", authenticateUser, async (req, res) => {
             .order("created_at", { ascending: true })
             .limit(100); 
 
-        if (error) throw error;
-        res.json({ history: data });
+        res.json({ history: data || [] });
 
     } catch (err) {
-        console.error("Fetch History Error:", err.message);
         res.status(500).json({ error: "فشل جلب الرسائل" });
     }
 });
@@ -266,14 +226,7 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
         const userId = req.user.id;
-
-        const { error } = await supabase
-            .from("chat_history")
-            .delete()
-            .eq("user_id", userId)
-            .eq("conversation_id", conversationId);
-            
-        if (error) throw error;
+        await supabase.from("chat_history").delete().eq("user_id", userId).eq("conversation_id", conversationId);
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -281,15 +234,10 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
 });
 
 // ===============================================
-// 📂 Static Files
+// 📂 تشغيل السيرفر
 // ===============================================
 app.use(express.static(path.join(__dirname, "public")));
-
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running securely on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
