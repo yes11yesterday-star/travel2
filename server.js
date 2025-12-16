@@ -5,17 +5,16 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
-const rateLimit = require("express-rate-limit"); // 🛡️ استيراد مكتبة الحماية
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
 // ===============================================
-// 🛡️ 1. إعدادات الأمان (Rate Limiting) - حماية من الهجمات
+// 🛡️ 1. إعدادات الأمان
 // ===============================================
 
-// حماية عامة: 100 طلب كل 15 دقيقة لكل IP
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 100, 
@@ -25,7 +24,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// حماية خاصة ومشددة لتسجيل الدخول وإنشاء الحساب (5 محاولات فقط)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5, 
@@ -33,24 +31,17 @@ const authLimiter = rateLimit({
 });
 
 // ===============================================
-// 🔒 2. إعدادات CORS (تقييد النطاق)
+// 🔒 2. إعدادات CORS
 // ===============================================
-// ملاحظة: استبدل الروابط أدناه برابط موقعك الحقيقي عند الرفع
-
-
 
 const allowedOrigins = [
   "http://localhost:3000", 
   "http://localhost:5173", 
-  "https://travel2-3sms.onrender.com" // ✅ تم إضافة رابط موقعك الحقيقي
+  "https://travel2-3sms.onrender.com" // ✅ رابط موقعك الصحيح
 ];
-
-
-
 
 app.use(cors({
     origin: function (origin, callback) {
-      // السماح بالطلبات التي ليس لها origin (مثل تطبيقات الموبايل أو Postman أثناء التطوير)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         return callback(new Error('غير مسموح لهذا النطاق بالوصول للسيرفر (CORS policy)'), false);
@@ -77,7 +68,7 @@ if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // ===============================================
-// 🛡️ Middleware: التحقق من صحة المستخدم (Auth Check)
+// 🛡️ Middleware: التحقق من صحة المستخدم
 // ===============================================
 const authenticateUser = async (req, res, next) => {
   try {
@@ -106,12 +97,10 @@ const authenticateUser = async (req, res, next) => {
 // 🔐 Auth Endpoints
 // ===============================================
 
-// تطبيق الحماية المشددة على هذه الروابط
 app.post("/api/signup", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ✅ التحقق من صحة المدخلات (Input Validation)
     if (!email || !email.includes("@")) {
         return res.status(400).json({ error: "البريد الإلكتروني غير صالح" });
     }
@@ -184,10 +173,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
         return res.status(400).json({ error: "بيانات ناقصة" });
     }
 
-    // ✅ تنظيف وتقليص النصوص لتجنب استهلاك الكوتا
     let interviewText = qaList.map(item => {
         const safeQuestion = item.question ? item.question.substring(0, 200) : "";
-        const safeAnswer = item.answer ? item.answer.substring(0, 1000) : ""; // حد أقصى للإجابة
+        const safeAnswer = item.answer ? item.answer.substring(0, 1000) : ""; 
         return `- س: ${safeQuestion}\n- ج: ${safeAnswer}`;
     }).join("\n");
 
@@ -211,8 +199,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
     التنسيق: Markdown، عناوين واضحة، وإيموجي.
     `;
 
+    // ✅ تم التصحيح: استخدام gemini-1.5-flash
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       { contents: [{ role: "user", parts: [{ text: planPrompt }] }] },
       { headers: { "Content-Type": "application/json" } }
     );
@@ -245,19 +234,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
 
 // ===============================================
 // 💬 إدارة المحادثات
-// ===========================================
+// ===============================================
 
-
-
-const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        { contents: [{ role: "user", parts: [{ text: planPrompt }] }] },
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-
-
-
+// ✅ تم التصحيح: تحويل الدالة إلى POST لتقرأ من body
 app.post("/api/chat/history", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
@@ -284,8 +263,6 @@ app.post("/api/chat/history", authenticateUser, async (req, res) => {
     }
 });
 
-
-
 app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
@@ -304,15 +281,6 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     }
 });
 
-
-
-
-
-
-
-
-
-
 // ===============================================
 // 📂 Static Files
 // ===============================================
@@ -326,5 +294,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running securely on port ${PORT}`);
 });
-
-
