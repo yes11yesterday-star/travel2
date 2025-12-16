@@ -2066,9 +2066,6 @@ function selectCustomCountry(name, flag) {
 
 
 
-
-
-
 async function selectCountry(country) {
     if (!currentUser) {
         alert("🔒 يرجى تسجيل الدخول أولاً للبدء في الخطة.");
@@ -2077,10 +2074,6 @@ async function selectCountry(country) {
     }
 
     const fixedConversationId = `${country.name}_PLAN_${currentUser.id}`;
-    
-    // طباعة المعرف للتأكد من أنه ثابت
-    console.log("Checking Plan for ID:", fixedConversationId);
-
     interviewState.countryName = country.name;
     interviewState.countryFlag = country.flag;
     interviewState.conversationId = fixedConversationId;
@@ -2090,37 +2083,33 @@ async function selectCountry(country) {
     interviewState.isAnalyzing = false;
 
     const chatBox = document.getElementById('chatMessages');
-    chatBox.className = "space-y-3 md:space-y-4 mb-4 md:mb-6 max-h-[400px] md:max-h-[500px] overflow-y-auto p-3 md:p-4 bg-white/50 rounded-2xl";
     chatBox.innerHTML = '';
-    
     document.getElementById('countrySelection').classList.add('hidden');
     document.getElementById('chatSection').classList.remove('hidden');
-    const analysisSection = document.getElementById('analysisSection');
-    if (analysisSection) analysisSection.classList.add('hidden');
-    chatBox.classList.remove('hidden');
     
-    const footerNote = document.querySelector('#chatSection .text-center.mt-3');
-    if(footerNote) footerNote.style.display = 'none'; 
-
     document.getElementById('selectedCountryFlag').textContent = country.flag;
     document.getElementById('selectedCountryName').textContent = country.name;
 
     showLoadingIndicator(true);
     try {
+        // 🔥 خطوة 1: جلب التوكن
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const token = session?.access_token;
+
         const isSubscribed = await loadSubscriptionStatus(); 
         
+        // 🔥 خطوة 2: إرسال التوكن
         const res = await fetch(`${API_BASE_URL}/api/chat/history`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // 👈 إضافة التوكن هنا أيضاً
+            },
             body: JSON.stringify({ userId: currentUser.id, conversationId: fixedConversationId })
         });
         
         const data = await res.json();
-        
-        // 🔥 التعديل الهام هنا: جلب آخر عنصر في المصفوفة (الأحدث) بدلاً من الأول
-        // data.history[data.history.length - 1] بدلاً من data.history[0]
-        // نأخذ آخر عنصر في المصفوفة لأنه هو الأحدث
-const existingPlan = data.history && data.history.length > 0 ? data.history[data.history.length - 1] : null;
+        const existingPlan = data.history && data.history.length > 0 ? data.history[data.history.length - 1] : null;
 
         showLoadingIndicator(false);
 
@@ -2138,8 +2127,6 @@ const existingPlan = data.history && data.history.length > 0 ? data.history[data
         startInterviewSequence();
     }
 }
-
-
 
 
 
@@ -2278,6 +2265,8 @@ function injectAnalysisHTML() {
 // ========================================
 // 2. منطق التحليل (حسابات دقيقة للدائرة الجديدة)
 // ========================================
+
+
 async function startAnalysis() {
     if (interviewState.isAnalyzing) return; 
     interviewState.isAnalyzing = true;
@@ -2290,21 +2279,37 @@ async function startAnalysis() {
     document.getElementById('chatMessages').classList.add('hidden');
     document.getElementById('inputArea').classList.add('hidden');
 
-    // طلب البيانات
+    // 🔥 خطوة 1: جلب التوكن (بطاقة الهوية)
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const token = session?.access_token;
+
+    if (!token) {
+        alert("انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى.");
+        showPage('login');
+        return;
+    }
+
+    // 🔥 خطوة 2: إرسال التوكن مع الطلب
     const planPromise = fetch(`${API_BASE_URL}/api/generate-plan`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // 👈 هذا هو السطر الذي كان ناقصاً
+        },
         body: JSON.stringify({
             userId: currentUser.id,
             conversationId: interviewState.conversationId,
             country: interviewState.countryName,
             qaList: interviewState.qaList
         })
-    }).then(r => r.json()).catch(err => ({ error: true }));
+    }).then(r => {
+        if (!r.ok) throw new Error("Server Error");
+        return r.json();
+    }).catch(err => ({ error: true }));
 
     const subPromise = loadSubscriptionStatus();
 
-    // === الجمل المطلوبة ===
+    // ... باقي كود الأنيميشن (العداد) كما هو ...
     const stepsData = [
         { icon: "📂", text: "جارِ تحليل معلوماتك الشخصية لبناء خطة هجرة مناسبة…" },
         { icon: "⚖️", text: "جارِ مقارنة ملفك مع أحدث قوانين الهجرة لعام 2025…" },
@@ -2317,14 +2322,10 @@ async function startAnalysis() {
     const progressCircle = document.getElementById('progressCircle');
     const percentageText = document.getElementById('percentage');
     const tilesStack = document.getElementById('tilesStack');
-
-    // حساب محيط الدائرة الجديد (2 * PI * 40) ≈ 251.2
     const circumference = 251.2;
-
-    const totalTime = 120000; // 120 ثانية
+    const totalTime = 60000; // تقليل الوقت لدقيقة للتجربة
     const updateInterval = 100;
     let currentTime = 0;
-    
     const timePerStep = totalTime / stepsData.length;
     let currentStepIndex = 0;
 
@@ -2335,14 +2336,9 @@ async function startAnalysis() {
             prevTile.classList.add('done');
             prevTile.querySelector('.icon-bubble').innerHTML = '✔'; 
         }
-
         const tile = document.createElement('div');
         tile.className = 'tile-item active';
-        tile.innerHTML = `
-            <div class="icon-bubble">${stepInfo.icon}</div>
-            <div class="tile-text">${stepInfo.text}</div>
-        `;
-        
+        tile.innerHTML = `<div class="icon-bubble">${stepInfo.icon}</div><div class="tile-text">${stepInfo.text}</div>`;
         tilesStack.appendChild(tile);
         requestAnimationFrame(() => {
             tile.classList.add('visible');
@@ -2354,14 +2350,9 @@ async function startAnalysis() {
 
     const timer = setInterval(async () => {
         currentTime += updateInterval;
-
-        // تحديث النسبة المئوية
         let percent = Math.min((currentTime / totalTime) * 100, 100);
         percentageText.textContent = Math.floor(percent) + '%';
-        
-        // حساب حركة الدائرة بدقة
-        const offset = circumference - (percent / 100) * circumference;
-        if(progressCircle) progressCircle.style.strokeDashoffset = offset;
+        if(progressCircle) progressCircle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
 
         if (currentTime >= (currentStepIndex + 1) * timePerStep && currentStepIndex < stepsData.length - 1) {
             currentStepIndex++;
@@ -2370,17 +2361,8 @@ async function startAnalysis() {
 
         if (currentTime >= totalTime) {
             clearInterval(timer);
-            
-            const lastTile = tilesStack.lastElementChild;
-            if (lastTile) {
-                lastTile.classList.remove('active');
-                lastTile.classList.add('done');
-                lastTile.querySelector('.icon-bubble').innerHTML = '✔';
-            }
-
             try {
                 const [planData, isSubscribed] = await Promise.all([planPromise, subPromise]);
-                
                 setTimeout(() => {
                     document.body.classList.remove('loading-mode');
                     overlay.remove(); 
@@ -2391,7 +2373,6 @@ async function startAnalysis() {
                         location.reload();
                     }
                 }, 1500);
-
             } catch (e) {
                 console.error(e);
                 alert("فشل الاتصال.");
@@ -2400,7 +2381,6 @@ async function startAnalysis() {
         }
     }, updateInterval);
 }
-
 
 
 
@@ -2932,7 +2912,6 @@ if (countryInput) {
 </body>
 
 </html>
-
 
 
 
