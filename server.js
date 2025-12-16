@@ -37,7 +37,7 @@ const authLimiter = rateLimit({
 const allowedOrigins = [
   "http://localhost:3000", 
   "http://localhost:5173", 
-  "https://travel2-3sms.onrender.com" // ✅ رابط موقعك الصحيح
+  "https://travel2-3sms.onrender.com" // ✅ رابط موقعك
 ];
 
 app.use(cors({
@@ -162,7 +162,7 @@ app.get("/api/subscription", authenticateUser, async (req, res) => {
 });
 
 // ===============================================
-// 🧠 توليد الخطة (AI)
+// 🧠 توليد الخطة (AI) - باستخدام Gemini 2.5 Flash
 // ===============================================
 app.post("/api/generate-plan", authenticateUser, async (req, res) => {
   try {
@@ -199,9 +199,9 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
     التنسيق: Markdown، عناوين واضحة، وإيموجي.
     `;
 
-    // ✅ تم التصحيح: استخدام gemini-1.5-flash
+    // 🔥 هنا تم التحديث لاستخدام Gemini 2.5 Flash كما طلبت
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       { contents: [{ role: "user", parts: [{ text: planPrompt }] }] },
       { headers: { "Content-Type": "application/json" } }
     );
@@ -236,7 +236,6 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
 // 💬 إدارة المحادثات
 // ===============================================
 
-// ✅ تم التصحيح: تحويل الدالة إلى POST لتقرأ من body
 app.post("/api/chat/history", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
