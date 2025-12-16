@@ -245,11 +245,22 @@ app.post("/api/generate-plan", authenticateUser, async (req, res) => {
 
 // ===============================================
 // 💬 إدارة المحادثات
-// ===============================================
+// ===========================================
 
-app.get("/api/chat/history", authenticateUser, async (req, res) => {
+
+
+const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        { contents: [{ role: "user", parts: [{ text: planPrompt }] }] },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+
+
+
+app.post("/api/chat/history", authenticateUser, async (req, res) => {
     try {
-        const { conversationId } = req.query;
+        const { conversationId } = req.body;
         const userId = req.user.id;
 
         if (!conversationId) {
@@ -273,6 +284,8 @@ app.get("/api/chat/history", authenticateUser, async (req, res) => {
     }
 });
 
+
+
 app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     try {
         const { conversationId } = req.body;
@@ -291,6 +304,15 @@ app.post("/api/chat/clear", authenticateUser, async (req, res) => {
     }
 });
 
+
+
+
+
+
+
+
+
+
 // ===============================================
 // 📂 Static Files
 // ===============================================
@@ -304,4 +326,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running securely on port ${PORT}`);
 });
+
 
